@@ -35,6 +35,7 @@ export default function ({ children }) {
         <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#2f2f2f" media="(prefers-color-scheme: dark)" />
         <meta name="robots" content="noindex,nofollow" />
+        <script defer src="https://cloud.webscount.com/script.js" data-website-id="4bc97333-2930-45c8-859c-4cb9f0b34cfd"></script>
       </head>
       <body>
         <Suspense>
