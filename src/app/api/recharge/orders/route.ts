@@ -7,6 +7,7 @@ import {
 } from '@/lib/recharge';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json } from '@/lib/response';
+import { notifyRechargeOrderSubmitted } from '@/lib/telegram';
 import {
   countUserPendingRechargeOrders,
   createRechargeOrder,
@@ -80,6 +81,14 @@ export async function POST(request: Request) {
     network: body?.network || process.env.USDT_NETWORK || 'TRC20',
     txId,
     periodDays: RECHARGE_SUBSCRIPTION_DAYS,
+  });
+
+  void notifyRechargeOrderSubmitted({
+    orderNo: order.orderNo,
+    plan: order.plan,
+    amount: order.amount,
+    currency: order.currency,
+    username: order.user?.username,
   });
 
   return json(order);

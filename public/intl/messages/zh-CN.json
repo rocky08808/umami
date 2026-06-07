@@ -501,6 +501,7 @@
     "amount": "充值金额",
     "network": "网络",
     "wallet-address": "USDT 收款地址",
+    "wallet-qr-hint": "扫码获取收款地址",
     "wallet-not-configured": "收款地址尚未配置。",
     "account": "账户",
     "valid-days": "{days} 天订阅",

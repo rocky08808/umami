@@ -24,6 +24,7 @@ import {
   normalizeTxId,
 } from '@/lib/recharge';
 import { RechargeOrdersList } from './RechargeOrdersList';
+import { WalletAddressQrCode } from './WalletAddressQrCode';
 
 export function RechargePage() {
   const t = useTranslations();
@@ -134,10 +135,13 @@ export function RechargePage() {
                 <Text weight="bold">{network}</Text>
               </Column>
 
-              <Column gap="1">
+              <Column gap="2">
                 <Label>{t('recharge.wallet-address')}</Label>
                 {walletAddress ? (
-                  <TextField value={walletAddress} isReadOnly allowCopy />
+                  <Column gap="3">
+                    <WalletAddressQrCode address={walletAddress} />
+                    <TextField value={walletAddress} isReadOnly allowCopy />
+                  </Column>
                 ) : (
                   <Text color="muted">{t('recharge.wallet-not-configured')}</Text>
                 )}

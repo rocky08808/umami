@@ -513,6 +513,7 @@
     "amount": "Amount",
     "network": "Network",
     "wallet-address": "USDT wallet address",
+    "wallet-qr-hint": "Scan to get wallet address",
     "wallet-not-configured": "Wallet address is not configured.",
     "account": "Account",
     "valid-days": "{days} days subscription",
