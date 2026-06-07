@@ -6,7 +6,7 @@ import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useBillingUsageQuery, useNavigation, useSubscription } from '@/components/hooks';
 import { Check } from '@/components/icons';
-import { getCurrentPlanId, PLANS, type PlanId } from '@/lib/billing';
+import { canUpgradePlan, getCurrentPlanId, PLANS, type PlanId } from '@/lib/billing';
 
 function PlanCard({
   planId,
@@ -68,7 +68,7 @@ function PlanCard({
         )}
       </Row>
 
-      {plan.actionKey && !isCurrent && (
+      {plan.actionKey && onAction && (
         <Column gap="1">
           <Button variant="primary" onPress={onAction}>
             {t(plan.actionKey)}
@@ -196,7 +196,9 @@ export function BillingPage() {
               planId={plan.id}
               isCurrent={currentPlanId === plan.id}
               onAction={
-                plan.actionKey ? () => handleUpgrade(plan.id) : undefined
+                plan.actionKey && canUpgradePlan(currentPlanId, plan.id)
+                  ? () => handleUpgrade(plan.id)
+                  : undefined
               }
             />
           ))}

@@ -144,3 +144,14 @@ export function getCurrentPlanId({
 
   return 'hobby';
 }
+
+const PLAN_RANK: Record<PlanId, number> = {
+  hobby: 0,
+  pro: 1,
+  business: 2,
+  enterprise: 3,
+};
+
+export function canUpgradePlan(currentPlanId: PlanId, targetPlanId: PlanId) {
+  return PLAN_RANK[targetPlanId] > PLAN_RANK[currentPlanId];
+}
