@@ -1,4 +1,5 @@
 import {
+  Button,
   Column,
   Form,
   FormButtons,
@@ -7,16 +8,19 @@ import {
   Heading,
   Icon,
   PasswordField,
+  Row,
+  Text,
   TextField,
 } from '@umami/react-zen';
 import { useRouter } from 'next/navigation';
-import { useMessages, useUpdateQuery } from '@/components/hooks';
+import { useConfig, useMessages, useUpdateQuery } from '@/components/hooks';
 import { Logo } from '@/components/svg';
 import { setClientAuthToken } from '@/lib/client';
 import { setUser } from '@/store/app';
 
 export function LoginForm() {
-  const { t, labels, getErrorMessage } = useMessages();
+  const { t, labels, messages, getErrorMessage } = useMessages();
+  const config = useConfig();
   const router = useRouter();
   const { mutateAsync, error } = useUpdateQuery('/auth/login');
 
@@ -65,6 +69,17 @@ export function LoginForm() {
           </FormSubmitButton>
         </FormButtons>
       </Form>
+
+      {config?.allowRegistration && (
+        <Row gap="1" alignItems="center">
+          <Text color="muted" size="sm">
+            {t(messages.noAccount)}
+          </Text>
+          <Button variant="quiet" size="sm" onPress={() => router.push('/register')}>
+            {t(labels.register)}
+          </Button>
+        </Row>
+      )}
     </Column>
   );
 }

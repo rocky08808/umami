@@ -13,6 +13,7 @@ export type Config = {
   updatesDisabled: boolean;
   usdtWalletAddress?: string;
   usdtNetwork?: string;
+  allowRegistration?: boolean;
 };
 
 export function useConfig(): Config {
