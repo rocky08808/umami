@@ -4,6 +4,7 @@ import { WebsiteNav } from '@/app/(main)/websites/[websiteId]/WebsiteNav';
 import { IconLabel } from '@/components/common/IconLabel';
 import { useGlobalState, useMessages, useNavigation } from '@/components/hooks';
 import {
+  FileText,
   Globe,
   Grid2x2,
   LayoutDashboard,
@@ -65,6 +66,12 @@ export function SideNav(props: any) {
       label: t(labels.pixels),
       path: '/pixels',
       icon: <Grid2x2 />,
+    },
+    {
+      id: 'integration',
+      label: t(labels.integration),
+      path: '/integration',
+      icon: <FileText />,
     },
   ];
 

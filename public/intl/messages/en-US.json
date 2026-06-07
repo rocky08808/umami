@@ -535,6 +535,21 @@
     "approve": "Approve",
     "reject": "Reject"
   },
+  "integration": {
+    "title": "Integration",
+    "description": "Add the tracking script to your site to start collecting analytics.",
+    "select-website": "Select website",
+    "step-1": "Choose the website you want to track.",
+    "step-2": "Copy the tracking script:",
+    "step-3": "Paste the code into the head section of every page, for example:",
+    "step-4": "Deploy your site and check the dashboard after visitors arrive.",
+    "tracking-title": "Tracking script",
+    "events-title": "Custom events",
+    "events-description": "After the script loads, send custom events with webscount.track.",
+    "events-example": "Example",
+    "website-settings": "Go to website settings",
+    "no-website": "Create a website first in Websites."
+  },
   "usage": {
     "title": "Usage",
     "plan": "Plan",

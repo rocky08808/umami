@@ -523,6 +523,21 @@
     "approve": "通过",
     "reject": "拒绝"
   },
+  "integration": {
+    "title": "对接文档",
+    "description": "将统计脚本添加到网站后即可开始采集访问数据。",
+    "select-website": "选择网站",
+    "step-1": "选择要对接的网站。",
+    "step-2": "复制统计脚本代码：",
+    "step-3": "将代码粘贴到每个页面的 head 中，参考示例：",
+    "step-4": "部署后访问网站，稍后在统计面板查看数据。",
+    "tracking-title": "统计脚本",
+    "events-title": "自定义事件",
+    "events-description": "脚本加载后可通过 webscount.track 上报自定义事件。",
+    "events-example": "示例代码",
+    "website-settings": "前往网站设置",
+    "no-website": "请先在网站管理中创建网站。"
+  },
   "usage": {
     "title": "用量",
     "plan": "方案",

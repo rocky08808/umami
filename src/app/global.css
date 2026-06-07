@@ -57,8 +57,19 @@ select:-webkit-autofill:focus {
 }
 
 /* Code snippet textareas */
-.code-textarea textarea {
+.code-textarea textarea,
+.code-snippet {
   min-height: 100px;
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-md, 6px);
+  border: 1px solid var(--border-default);
+  background-color: var(--surface-sunken);
+  color: var(--text-primary);
+  resize: none;
 }
 
 /* Batch website domain input */
