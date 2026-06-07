@@ -170,7 +170,7 @@ export function RechargePage() {
               </Column>
 
               {orderLimitReached && (
-                <Text color="muted" size="sm">
+                <Text color="red" size="sm">
                   {t('recharge.order-limit-reached', { limit: RECHARGE_MAX_PENDING_ORDERS_PER_USER })}
                 </Text>
               )}
