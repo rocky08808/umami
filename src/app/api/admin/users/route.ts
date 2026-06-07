@@ -24,6 +24,12 @@ export async function GET(request: Request) {
   const users = await getUsers(
     {
       include: {
+        userSubscription: {
+          select: {
+            plan: true,
+            expiresAt: true,
+          },
+        },
         _count: {
           select: {
             websites: {

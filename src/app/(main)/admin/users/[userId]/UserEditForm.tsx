@@ -1,4 +1,5 @@
 import {
+  Column,
   Form,
   FormButtons,
   FormField,
@@ -6,14 +7,18 @@ import {
   ListItem,
   PasswordField,
   Select,
+  Text,
   TextField,
 } from '@umami/react-zen';
+import { useTranslations } from 'next-intl';
+import { UserPlanDisplay } from '@/components/common/UserPlanDisplay';
 import { useLoginQuery, useMessages, useUpdateQuery, useUser } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
 
 export function UserEditForm({ userId, onSave }: { userId: string; onSave?: () => void }) {
   const { t, labels, messages, getErrorMessage } = useMessages();
-  const user = useUser();
+  const tb = useTranslations('billing');
+  const user = useUser() as any;
   const { user: login } = useLoginQuery();
 
   const { mutateAsync, error, toast, touch } = useUpdateQuery(`/users/${userId}`);
@@ -30,7 +35,15 @@ export function UserEditForm({ userId, onSave }: { userId: string; onSave?: () =
   };
 
   return (
-    <Form onSubmit={handleSubmit} error={getErrorMessage(error)} values={user}>
+    <Column gap="6">
+      <Column gap="2">
+        <Text color="muted" size="sm">
+          {tb('current-plan')}
+        </Text>
+        <UserPlanDisplay subscription={user.userSubscription} bold />
+      </Column>
+
+      <Form onSubmit={handleSubmit} error={getErrorMessage(error)} values={user}>
       <FormField name="username" label={t(labels.username)}>
         <TextField data-test="input-username" />
       </FormField>
@@ -64,6 +77,7 @@ export function UserEditForm({ userId, onSave }: { userId: string; onSave?: () =
           {t(labels.save)}
         </FormSubmitButton>
       </FormButtons>
-    </Form>
+      </Form>
+    </Column>
   );
 }

@@ -5,6 +5,7 @@ import { badRequest, json, notFound, ok, unauthorized } from '@/lib/response';
 import { userRoleParam } from '@/lib/schema';
 import { canDeleteUser, canUpdateUser, canViewUser } from '@/permissions';
 import { deleteUser, getUser, getUserByUsername, updateUser } from '@/queries/prisma';
+import { getUserSubscriptionRecord } from '@/queries/prisma/recharge';
 
 export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const { auth, error } = await parseRequest(request);
@@ -21,7 +22,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
   const user = await getUser(userId);
 
-  return json(user);
+  if (!user) {
+    return notFound();
+  }
+
+  const userSubscription = await getUserSubscriptionRecord(userId);
+
+  return json({ ...user, userSubscription });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ userId: string }> }) {
