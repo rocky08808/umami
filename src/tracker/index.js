@@ -43,8 +43,14 @@
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
   const endpoint = `${host.replace(/\/$/, '')}__COLLECT_API_ENDPOINT__`;
   const screen = `${width}x${height}`;
-  const eventRegex = /data-umami-event-([\w-_]+)/;
-  const eventNameAttribute = `${_data}umami-event`;
+  const trackerName = 'webscount';
+  const legacyTrackerName = 'umami';
+  const eventRegex = new RegExp(`data-(?:${trackerName}|${legacyTrackerName})-event-([\\w-_]+)`);
+  const eventNameAttribute = `${_data}${trackerName}-event`;
+  const legacyEventNameAttribute = `${_data}${legacyTrackerName}-event`;
+
+  const getEventName = el =>
+    el?.getAttribute(eventNameAttribute) || el?.getAttribute(legacyEventNameAttribute);
   const delayDuration = 300;
 
   /* Helper functions */
@@ -110,7 +116,7 @@
 
   const handleClicks = () => {
     const trackElement = async el => {
-      const eventName = el.getAttribute(eventNameAttribute);
+      const eventName = getEventName(el);
       if (eventName) {
         const eventData = {};
 
@@ -128,7 +134,7 @@
       if (!parentElement) return trackElement(el);
 
       const { href, target } = parentElement;
-      if (!parentElement.getAttribute(eventNameAttribute)) return;
+      if (!getEventName(parentElement)) return;
 
       if (parentElement.tagName === 'BUTTON') {
         return trackElement(parentElement);
@@ -156,6 +162,7 @@
   const trackingDisabled = () =>
     disabled ||
     !website ||
+    localStorage?.getItem('webscount.disabled') ||
     localStorage?.getItem('umami.disabled') ||
     (domain && !domains.includes(hostname)) ||
     (dnt && hasDoNotTrack());
@@ -384,12 +391,18 @@
 
   /* Start */
 
+  const api = {
+    track,
+    identify,
+    getSession: () => ({ cache, website }),
+  };
+
+  if (!window.webscount) {
+    window.webscount = api;
+  }
+
   if (!window.umami) {
-    window.umami = {
-      track,
-      identify,
-      getSession: () => ({ cache, website }),
-    };
+    window.umami = window.webscount;
   }
 
   let currentUrl = normalize(href);

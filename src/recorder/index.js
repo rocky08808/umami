@@ -35,7 +35,7 @@ import { record } from 'rrweb';
   let stopped = false;
 
   const sendEvents = (events, useKeepalive = false) => {
-    const session = window.umami?.getSession?.();
+    const session = window.webscount?.getSession?.() || window.umami?.getSession?.();
     if (!session?.cache) return;
 
     const body = JSON.stringify({
@@ -101,7 +101,7 @@ import { record } from 'rrweb';
   const waitForSession = (attempts = 0) => {
     if (attempts > 50) return;
 
-    const session = window.umami?.getSession?.();
+    const session = window.webscount?.getSession?.() || window.umami?.getSession?.();
     if (session?.cache) {
       beginRecording();
     } else {
