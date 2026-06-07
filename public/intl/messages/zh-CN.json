@@ -523,6 +523,26 @@
     "approve": "通过",
     "reject": "拒绝"
   },
+  "usage": {
+    "title": "用量",
+    "plan": "方案",
+    "billing-period": "账单周期",
+    "events": "事件",
+    "total": "总计",
+    "breakdown": "用量",
+    "sources": "来源",
+    "column-type": "类型",
+    "column-name": "名称",
+    "column-total": "总计",
+    "type-events": "事件",
+    "type-event-data": "事件数据",
+    "type-session-data": "会话数据",
+    "type-heatmaps": "热图",
+    "quota-websites": "网站用量",
+    "quota-events": "事件用量",
+    "unlimited": "无限制",
+    "upgrade-plan": "升级方案"
+  },
   "recharge": {
     "title": "充值",
     "description": "使用 USDT 充值订阅，支付后由人工审核开通。",

@@ -535,6 +535,26 @@
     "approve": "Approve",
     "reject": "Reject"
   },
+  "usage": {
+    "title": "Usage",
+    "plan": "Plan",
+    "billing-period": "Billing period",
+    "events": "Events",
+    "total": "Total",
+    "breakdown": "Usage",
+    "sources": "Sources",
+    "column-type": "Type",
+    "column-name": "Name",
+    "column-total": "Total",
+    "type-events": "Events",
+    "type-event-data": "Event data",
+    "type-session-data": "Session data",
+    "type-heatmaps": "Heatmaps",
+    "quota-websites": "Websites",
+    "quota-events": "Events",
+    "unlimited": "Unlimited",
+    "upgrade-plan": "Upgrade plan"
+  },
   "recharge": {
     "title": "Recharge",
     "description": "Top up your subscription with USDT. Payments are reviewed manually.",

@@ -1,8 +1,11 @@
+import { getBillingPeriod } from '@/lib/billing-usage';
 import { getOwnerMonthlyEventUsage } from '@/lib/billing-events';
 import { getOwnerWebsiteUsage, isSelfHostedBilling } from '@/lib/billing-limits';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
 import { getUserSubscriptionDetails } from '@/lib/subscription';
+import { getOwnerUsageMetrics } from '@/queries/sql/billing/getOwnerUsageMetrics';
+import { getOwnerWebsiteEventUsage } from '@/queries/sql/billing/getOwnerWebsiteEventUsage';
 
 export async function GET(request: Request) {
   const { auth, error } = await parseRequest(request);
@@ -12,7 +15,14 @@ export async function GET(request: Request) {
   }
 
   if (!isSelfHostedBilling()) {
-    return json({ subscription: null, events: null, websites: null });
+    return json({
+      subscription: null,
+      events: null,
+      websites: null,
+      period: null,
+      metrics: null,
+      sources: [],
+    });
   }
 
   const [subscription, events, websites] = await Promise.all([
@@ -21,5 +31,21 @@ export async function GET(request: Request) {
     getOwnerWebsiteUsage(auth.user.id),
   ]);
 
-  return json({ subscription, events, websites });
+  const period = getBillingPeriod(subscription.expiresAt);
+  const [metrics, sources] = await Promise.all([
+    getOwnerUsageMetrics(auth.user.id, period.startDate, period.endDate),
+    getOwnerWebsiteEventUsage(auth.user.id, period.startDate, period.endDate),
+  ]);
+
+  return json({
+    subscription,
+    events,
+    websites,
+    period: {
+      startAt: period.periodStart.toISOString(),
+      endAt: period.periodEnd.toISOString(),
+    },
+    metrics,
+    sources,
+  });
 }
