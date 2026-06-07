@@ -1,5 +1,5 @@
 'use client';
-import { Column, ListItem, Row, Select } from '@umami/react-zen';
+import { Column, ListItem, Row, Select, Text } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PageBody } from '@/components/common/PageBody';
@@ -25,7 +25,8 @@ export function AdminRechargePage() {
 
         <Panel>
           <Column gap="4">
-            <Row>
+            <Row alignItems="center" gap="3" wrap="wrap">
+              <Text color="muted">{t('recharge.status')}</Text>
               <Select
                 value={statusFilter}
                 onChange={value => setStatusFilter(value as string)}
