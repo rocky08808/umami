@@ -448,6 +448,7 @@
     "event-limit-reached": "本月事件量已达 {limit} 上限，数据采集已暂停。",
     "website-limit-reached": "当前方案最多 {limit} 个网站，已达上限。",
     "team-member-limit-reached": "当前方案最多 {limit} 名团队成员，已达上限。",
+    "team-join-limit-reached": "该团队已达到成员上限（最多 {limit} 人），请联系团队管理员。",
     "hobby-events": "每月包含 10 万次事件",
     "hobby-websites": "最多 3 个网站",
     "hobby-retention": "6 个月数据保留",

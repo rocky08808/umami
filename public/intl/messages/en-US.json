@@ -460,6 +460,7 @@
     "event-limit-reached": "Monthly event limit of {limit} reached. Data collection is paused.",
     "website-limit-reached": "Your current plan allows up to {limit} websites.",
     "team-member-limit-reached": "Your current plan allows up to {limit} team members.",
+    "team-join-limit-reached": "This team has reached its member limit of {limit}. Please contact the team owner.",
     "hobby-events": "100K events per month included",
     "hobby-websites": "Up to 3 websites",
     "hobby-retention": "6 month data retention",

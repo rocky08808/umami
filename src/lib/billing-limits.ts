@@ -5,6 +5,7 @@ import { getUserSubscription, planToSubscription } from '@/lib/subscription';
 export { isWithinLimit };
 import { getOwnerWebsiteCount } from '@/queries/prisma/billing';
 import { getTeamOwner } from '@/queries/prisma/team';
+import { getTeamMemberCount } from '@/queries/prisma/teamUser';
 
 export function isSelfHostedBilling() {
   return !process.env.CLOUD_MODE;
@@ -41,6 +42,25 @@ export async function getOwnerWebsiteUsage(userId: string) {
   const { limits } = await getUserPlanLimits(userId);
   const limit = limits.websites;
   const count = await getOwnerWebsiteCount(userId);
+
+  return {
+    count,
+    limit,
+    limited: limit !== null && !isWithinLimit(count, limit),
+  };
+}
+
+export async function getTeamMemberUsage(teamId: string) {
+  const owner = await getTeamOwner(teamId);
+  const ownerId = owner?.userId;
+
+  if (!ownerId) {
+    return { count: 0, limit: null, limited: false };
+  }
+
+  const { limits } = await getUserPlanLimits(ownerId);
+  const limit = limits.teamMembers;
+  const count = await getTeamMemberCount(teamId);
 
   return {
     count,

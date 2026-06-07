@@ -1,4 +1,5 @@
 import { getCurrentPlanId, getPlanLimits, isWithinLimit } from '@/lib/billing';
+import { useApi } from './useApi';
 import { useBillingUsageQuery } from './queries/useBillingUsageQuery';
 import { useConfig } from './useConfig';
 import { useLoginQuery } from './queries/useLoginQuery';
@@ -49,6 +50,24 @@ export function useTeamMemberLimitStatus(teamId: string) {
     limited: !isWithinLimit(count, limit),
     limit,
     count,
+  };
+}
+
+export function useTeamJoinLimitStatus(accessCode: string) {
+  const billingEnabled = useBillingEnabled();
+  const { get, useQuery } = useApi();
+
+  const { data } = useQuery({
+    queryKey: ['teams:join:limit', accessCode],
+    queryFn: () => get('/teams/join', { accessCode }),
+    enabled: billingEnabled && accessCode.length >= 10,
+    retry: false,
+  });
+
+  return {
+    limited: data?.limited ?? false,
+    limit: data?.limit ?? null,
+    count: data?.count ?? 0,
   };
 }
 
