@@ -21,7 +21,7 @@ export const RECHARGE_OPTIONS: RechargeOption[] = [
 
 export const RECHARGE_SUBSCRIPTION_DAYS = 30;
 
-export const RECHARGE_MAX_PENDING_ORDERS_PER_USER = 2;
+export const RECHARGE_MAX_PENDING_ORDERS_PER_USER = 1;
 
 export const RECHARGE_ORDER_STATUS = {
   pending: 'pending',
