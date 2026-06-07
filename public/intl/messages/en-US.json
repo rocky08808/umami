@@ -451,6 +451,8 @@
     "upgrade-to-business": "Upgrade to Business",
     "contact-us": "Contact Us",
     "view-plans": "View plans",
+    "expires-at": "Subscription expires: {date}",
+    "expired-at": "Subscription expired on {date}",
     "websites-usage": "Websites: {count} / {limit}",
     "websites-usage-unlimited": "Websites: {count}",
     "events-usage": "Events this month: {count} / {limit}",

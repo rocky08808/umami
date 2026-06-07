@@ -13,6 +13,26 @@ export function planToSubscription(plan: PlanId, expiresAt?: Date | null): Subsc
   };
 }
 
+export async function getUserSubscriptionDetails(userId: string) {
+  const record = await getUserSubscriptionRecord(userId);
+
+  if (!record || record.plan === 'hobby') {
+    return {
+      plan: 'hobby' as PlanId,
+      expiresAt: null,
+      expired: false,
+    };
+  }
+
+  const expired = !!record.expiresAt && record.expiresAt < new Date();
+
+  return {
+    plan: record.plan as PlanId,
+    expiresAt: record.expiresAt?.toISOString() ?? null,
+    expired,
+  };
+}
+
 export async function getUserSubscription(userId: string): Promise<Subscription> {
   const record = await getUserSubscriptionRecord(userId);
 

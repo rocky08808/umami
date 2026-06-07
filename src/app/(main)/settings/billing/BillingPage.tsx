@@ -106,8 +106,16 @@ export function BillingPage() {
   const subscription = useSubscription();
   const { data: usage } = useBillingUsageQuery();
   const currentPlanId = getCurrentPlanId(subscription);
+  const subscriptionInfo = usage?.subscription;
   const events = usage?.events;
   const websites = usage?.websites;
+
+  const formatExpiryDate = (value: string) =>
+    new Date(value).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
 
   const handleUpgrade = (planId: PlanId) => {
     if (planId === 'enterprise') {
@@ -123,8 +131,20 @@ export function BillingPage() {
       <Column gap="6">
         <PageHeader title={t('billing.title')} showBorder={false} />
 
-        {(events || websites) && (
+        {(subscriptionInfo?.expiresAt || events || websites) && (
           <Column gap="2">
+            {subscriptionInfo?.expiresAt && (
+              <Text color={subscriptionInfo.expired ? 'red' : undefined}>
+                {subscriptionInfo.expired
+                  ? t('billing.expired-at', {
+                      date: formatExpiryDate(subscriptionInfo.expiresAt),
+                    })
+                  : t('billing.expires-at', {
+                      date: formatExpiryDate(subscriptionInfo.expiresAt),
+                    })}
+              </Text>
+            )}
+
             {websites && (
               <Text color={websites.limited ? 'red' : undefined}>
                 {websites.limit === null

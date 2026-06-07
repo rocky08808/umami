@@ -439,6 +439,8 @@
     "upgrade-to-business": "升级到 Business",
     "contact-us": "联系我们",
     "view-plans": "查看方案",
+    "expires-at": "订阅到期：{date}",
+    "expired-at": "订阅已于 {date} 过期",
     "websites-usage": "网站数量：{count} / {limit}",
     "websites-usage-unlimited": "网站数量：{count}",
     "events-usage": "本月事件用量：{count} / {limit}",

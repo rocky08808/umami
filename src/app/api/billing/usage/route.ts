@@ -2,6 +2,7 @@ import { getOwnerMonthlyEventUsage } from '@/lib/billing-events';
 import { getOwnerWebsiteUsage, isSelfHostedBilling } from '@/lib/billing-limits';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
+import { getUserSubscriptionDetails } from '@/lib/subscription';
 
 export async function GET(request: Request) {
   const { auth, error } = await parseRequest(request);
@@ -11,13 +12,14 @@ export async function GET(request: Request) {
   }
 
   if (!isSelfHostedBilling()) {
-    return json({ events: null, websites: null });
+    return json({ subscription: null, events: null, websites: null });
   }
 
-  const [events, websites] = await Promise.all([
+  const [subscription, events, websites] = await Promise.all([
+    getUserSubscriptionDetails(auth.user.id),
     getOwnerMonthlyEventUsage(auth.user.id),
     getOwnerWebsiteUsage(auth.user.id),
   ]);
 
-  return json({ events, websites });
+  return json({ subscription, events, websites });
 }
