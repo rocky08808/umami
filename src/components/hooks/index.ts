@@ -101,6 +101,7 @@ export * from './usePageParameters';
 export * from './useRegionNames';
 export * from './useSlug';
 export * from './useSticky';
+export * from './useTeamActionsAllowed';
 export * from './useSubscription';
 export * from './useTimezone';
 export * from './useWebsiteNavItems';
