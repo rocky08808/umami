@@ -31,7 +31,29 @@ export async function request(
     },
     body,
   }).then(async res => {
-    const data = await res.json();
+    const contentType = res.headers.get('content-type') || '';
+    let data: any;
+
+    try {
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = {
+          error: {
+            message: text.startsWith('<!') ? 'Server error' : text,
+            status: res.status,
+          },
+        };
+      }
+    } catch {
+      data = {
+        error: {
+          message: 'Invalid server response',
+          status: res.status,
+        },
+      };
+    }
 
     return {
       ok: res.ok,

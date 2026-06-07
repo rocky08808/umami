@@ -61,6 +61,7 @@ export const labels: Record<string, string> = {
   deleteReport: 'label.delete-report',
   reset: 'label.reset',
   addWebsite: 'label.add-website',
+  batchAddWebsite: 'label.batch-add-website',
   addMember: 'label.add-member',
   editMember: 'label.edit-member',
   removeMember: 'label.remove-member',

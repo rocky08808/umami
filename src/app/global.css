@@ -61,6 +61,17 @@ select:-webkit-autofill:focus {
   min-height: 100px;
 }
 
+/* Batch website domain input */
+.batch-domains-textarea textarea {
+  min-height: 200px;
+}
+
+.batch-results-textarea textarea {
+  min-height: 200px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
 /* rrweb-player overrides */
 .rr-controller__btns {
   gap: 8px;
