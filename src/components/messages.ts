@@ -380,6 +380,8 @@ export const labels: Record<string, string> = {
   duration: 'label.duration',
   recorded: 'label.recorded',
   upgrade: 'label.upgrade',
+  billing: 'billing.title',
+  administration: 'label.administration',
 };
 
 export const messages: Record<string, string> = {
