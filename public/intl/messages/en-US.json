@@ -414,6 +414,7 @@
     "batch-websites-copy-ids": "Copy all IDs",
     "batch-websites-copy-share-urls": "Copy all share links",
     "batch-websites-copy-all": "Copy all",
+    "copied": "Copied to clipboard",
     "min-password-length": "Minimum length of {n} characters",
     "new-version-available": "A new version of Umami {version} is available!",
     "no-data-available": "No data available.",

@@ -1,7 +1,7 @@
 'use client';
-import { Button, Column, Row, Text, TextField, useToast } from '@umami/react-zen';
+import { AlertBanner, Button, Column, Row, Text, TextField, useToast } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BillingLimitNotice } from '@/components/common/BillingLimitNotice';
 import { useApi, useConfig, useMessages, useModified, useWebsiteLimitStatus } from '@/components/hooks';
 import { isValidDomain, parseBatchDomains } from '@/lib/websites';
@@ -33,6 +33,16 @@ export function WebsiteBatchAddForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdResults, setCreatedResults] = useState<CreatedWebsite[] | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const copyTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const domains = useMemo(() => parseBatchDomains(domainsText), [domainsText]);
   const invalidDomains = domains.filter(domain => !isValidDomain(domain));
@@ -65,12 +75,49 @@ export function WebsiteBatchAddForm({
     };
   }, [cloudMode, createdResults, labels, tm]);
 
-  const copyText = async (text: string) => {
-    if (!text || !navigator?.clipboard) {
+  const copyToClipboard = async (text: string) => {
+    if (!text) {
+      return false;
+    }
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCopy = async (text: string) => {
+    const ok = await copyToClipboard(text);
+    if (!ok) {
       return;
     }
 
-    await navigator.clipboard.writeText(text);
+    setCopySuccess(true);
+    toast(t('message.copied'));
+
+    if (copyTimeoutRef.current) {
+      window.clearTimeout(copyTimeoutRef.current);
+    }
+
+    copyTimeoutRef.current = window.setTimeout(() => {
+      setCopySuccess(false);
+    }, 2500);
   };
 
   const handleSubmit = async () => {
@@ -116,14 +163,16 @@ export function WebsiteBatchAddForm({
       <Column gap="4">
         <Text weight="bold">{t('message.batch-websites-created', { count: createdResults.length })}</Text>
 
+        {copySuccess && <AlertBanner variant="success" title={t('message.copied')} />}
+
         <Row gap="2" wrap="wrap">
-          <Button variant="outline" onPress={() => copyText(batchCopyText.ids)}>
+          <Button variant="outline" onPress={() => handleCopy(batchCopyText.ids)}>
             {t('message.batch-websites-copy-ids')}
           </Button>
-          <Button variant="outline" onPress={() => copyText(batchCopyText.shareUrls)}>
+          <Button variant="outline" onPress={() => handleCopy(batchCopyText.shareUrls)}>
             {t('message.batch-websites-copy-share-urls')}
           </Button>
-          <Button variant="outline" onPress={() => copyText(batchCopyText.all)}>
+          <Button variant="outline" onPress={() => handleCopy(batchCopyText.all)}>
             {t('message.batch-websites-copy-all')}
           </Button>
         </Row>

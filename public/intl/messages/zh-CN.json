@@ -404,6 +404,7 @@
     "batch-websites-copy-ids": "复制全部 ID",
     "batch-websites-copy-share-urls": "复制全部分享链接",
     "batch-websites-copy-all": "复制全部",
+    "copied": "复制成功",
     "min-password-length": "密码最短长度为 {n} 个字符",
     "new-version-available": "Umami 新版本 {version} 已发布！",
     "no-data-available": "暂无数据。",
