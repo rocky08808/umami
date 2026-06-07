@@ -578,6 +578,7 @@
     "recharge-link": "Go to USDT recharge",
     "subscribe-with-balance": "Purchase with balance",
     "subscribe-description": "Use your account balance to purchase or renew a plan without another transfer.",
+    "pro-upgrade-hint": "Business {businessDays} days, remaining Pro time converted to {proConvertedDays} days, {totalDays} days total.",
     "subscribe-button": "Purchase with balance",
     "subscribe-success": "Subscription activated.",
     "subscribe-error": "Unable to complete purchase. Please try again.",

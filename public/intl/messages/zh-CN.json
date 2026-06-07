@@ -566,6 +566,7 @@
     "recharge-link": "前往 USDT 充值",
     "subscribe-with-balance": "余额购买",
     "subscribe-description": "使用账户余额直接购买或续费订阅，无需再次转账。",
+    "pro-upgrade-hint": "Business {businessDays} 天，Pro 剩余时长折算 {proConvertedDays} 天，共 {totalDays} 天。",
     "subscribe-button": "使用余额购买",
     "subscribe-success": "订阅已开通。",
     "subscribe-error": "购买失败，请稍后重试。",

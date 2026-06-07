@@ -26,9 +26,11 @@ import {
 import { canSubscribeToPlan, type PlanId } from '@/lib/billing';
 import {
   RECHARGE_OPTIONS,
-  RECHARGE_SUBSCRIPTION_DAYS,
   formatAmountDisplay,
+  getProToBusinessUpgradeBreakdown,
   getRechargeOption,
+  getSubscriptionPeriodDays,
+  isProToBusinessUpgrade,
 } from '@/lib/recharge';
 import { WALLET_TRANSACTION_TYPE } from '@/lib/wallet-constants';
 
@@ -148,8 +150,15 @@ export function BalancePage() {
                     <Column gap="1">
                       <Text weight="bold">{t(item.nameKey)}</Text>
                       <Text color="muted">
-                        {t('recharge.valid-days', { days: RECHARGE_SUBSCRIPTION_DAYS })}
+                        {t('recharge.valid-days', {
+                          days: getSubscriptionPeriodDays(subscription, item.plan),
+                        })}
                       </Text>
+                      {isProToBusinessUpgrade(subscription, item.plan) && (
+                        <Text color="muted" size="sm">
+                          {t('balance.pro-upgrade-hint', getProToBusinessUpgradeBreakdown())}
+                        </Text>
+                      )}
                       {!allowed && (
                         <Text color="red" size="sm">
                           {t('balance.business-active')}

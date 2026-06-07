@@ -1,6 +1,13 @@
 import type { Subscription } from '@/components/hooks/useSubscription';
 import type { PlanId } from '@/lib/billing';
+import {
+  PRO_TO_BUSINESS_BONUS_DAYS,
+  RECHARGE_SUBSCRIPTION_DAYS,
+  isProToBusinessUpgrade,
+} from '@/lib/recharge';
 import { getUserSubscriptionRecord, upsertUserSubscription } from '@/queries/prisma/recharge';
+
+export { getSubscriptionPeriodDays, isProToBusinessUpgrade } from '@/lib/recharge';
 
 export function planToSubscription(plan: PlanId, expiresAt?: Date | null): Subscription {
   const isActive = plan !== 'hobby' && (!expiresAt || expiresAt > new Date());
@@ -54,8 +61,19 @@ export async function activateSubscription(
 ) {
   const record = await getUserSubscriptionRecord(userId);
   const now = new Date();
-  const baseDate = record?.expiresAt && record.expiresAt > now ? record.expiresAt : now;
-  const expiresAt = new Date(baseDate.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  const expired = !!record?.expiresAt && record.expiresAt < now;
+  const currentPlan = (record?.plan as PlanId) ?? 'hobby';
+  const proToBusinessUpgrade = isProToBusinessUpgrade({ plan: currentPlan, expired }, plan);
+  let expiresAt: Date;
+
+  if (proToBusinessUpgrade) {
+    const totalMs =
+      (RECHARGE_SUBSCRIPTION_DAYS + PRO_TO_BUSINESS_BONUS_DAYS) * 24 * 60 * 60 * 1000;
+    expiresAt = new Date(now.getTime() + totalMs);
+  } else {
+    const baseDate = record?.expiresAt && record.expiresAt > now ? record.expiresAt : now;
+    expiresAt = new Date(baseDate.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  }
 
   await upsertUserSubscription(userId, {
     plan,

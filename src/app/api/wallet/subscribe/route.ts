@@ -3,12 +3,12 @@ import { uuid } from '@/lib/crypto';
 import { isSelfHostedBilling } from '@/lib/billing-limits';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json } from '@/lib/response';
+import { RECHARGE_OPTIONS, getRechargeOption } from '@/lib/recharge';
 import {
-  RECHARGE_OPTIONS,
-  RECHARGE_SUBSCRIPTION_DAYS,
-  getRechargeOption,
-} from '@/lib/recharge';
-import { activateSubscription, getUserSubscriptionDetails } from '@/lib/subscription';
+  activateSubscription,
+  getSubscriptionPeriodDays,
+  getUserSubscriptionDetails,
+} from '@/lib/subscription';
 import { debitWallet, WALLET_REFERENCE_TYPE } from '@/lib/wallet';
 
 export async function POST(request: Request) {
@@ -52,13 +52,15 @@ export async function POST(request: Request) {
     throw e;
   }
 
-  await activateSubscription(auth.user.id, option.plan, RECHARGE_SUBSCRIPTION_DAYS);
+  const periodDays = getSubscriptionPeriodDays(subscription, option.plan);
+
+  await activateSubscription(auth.user.id, option.plan, periodDays);
 
   return json({
     plan: option.plan,
     amount: option.amount,
     currency: 'USDT',
-    periodDays: RECHARGE_SUBSCRIPTION_DAYS,
+    periodDays,
     plans: RECHARGE_OPTIONS.map(item => item.plan),
   });
 }

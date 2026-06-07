@@ -37,6 +37,34 @@ export const RECHARGE_MAX_AMOUNT = 100_000;
 
 export const RECHARGE_SUBSCRIPTION_DAYS = 30;
 
+export const PRO_TO_BUSINESS_BONUS_DAYS = 3;
+
+export function isProToBusinessUpgrade(
+  current: { plan: PlanId; expired?: boolean },
+  targetPlan: PlanId,
+) {
+  return current.plan === 'pro' && targetPlan === 'business' && !current.expired;
+}
+
+export function getProToBusinessUpgradeBreakdown() {
+  return {
+    businessDays: RECHARGE_SUBSCRIPTION_DAYS,
+    proConvertedDays: PRO_TO_BUSINESS_BONUS_DAYS,
+    totalDays: RECHARGE_SUBSCRIPTION_DAYS + PRO_TO_BUSINESS_BONUS_DAYS,
+  };
+}
+
+export function getSubscriptionPeriodDays(
+  current: { plan: PlanId; expired?: boolean },
+  targetPlan: PlanId,
+) {
+  if (isProToBusinessUpgrade(current, targetPlan)) {
+    return getProToBusinessUpgradeBreakdown().totalDays;
+  }
+
+  return RECHARGE_SUBSCRIPTION_DAYS;
+}
+
 export const RECHARGE_MAX_PENDING_ORDERS_PER_USER = 1;
 
 export const RECHARGE_ORDER_STATUS = {
