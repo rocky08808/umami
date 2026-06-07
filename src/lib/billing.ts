@@ -3,6 +3,7 @@ export type PlanId = 'hobby' | 'pro' | 'business' | 'enterprise';
 export interface PlanLimits {
   websites: number | null;
   teamMembers: number | null;
+  eventsPerMonth: number | null;
   retentionMonths: number;
   replays: boolean;
 }
@@ -11,24 +12,28 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
   hobby: {
     websites: 3,
     teamMembers: 3,
+    eventsPerMonth: 100_000,
     retentionMonths: 6,
     replays: false,
   },
   pro: {
     websites: 20,
     teamMembers: 10,
+    eventsPerMonth: 1_000_000,
     retentionMonths: 24,
     replays: false,
   },
   business: {
     websites: null,
     teamMembers: null,
+    eventsPerMonth: 10_000_000,
     retentionMonths: 60,
     replays: true,
   },
   enterprise: {
     websites: null,
     teamMembers: null,
+    eventsPerMonth: null,
     retentionMonths: 60,
     replays: true,
   },

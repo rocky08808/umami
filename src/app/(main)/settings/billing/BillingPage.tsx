@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
-import { useNavigation, useSubscription } from '@/components/hooks';
+import { useBillingUsageQuery, useNavigation, useSubscription } from '@/components/hooks';
 import { Check } from '@/components/icons';
 import { getCurrentPlanId, PLANS, type PlanId } from '@/lib/billing';
 
@@ -104,7 +104,10 @@ export function BillingPage() {
   const router = useRouter();
   const { renderUrl } = useNavigation();
   const subscription = useSubscription();
+  const { data: usage } = useBillingUsageQuery();
   const currentPlanId = getCurrentPlanId(subscription);
+  const events = usage?.events;
+  const websites = usage?.websites;
 
   const handleUpgrade = (planId: PlanId) => {
     if (planId === 'enterprise') {
@@ -119,6 +122,48 @@ export function BillingPage() {
     <PageBody>
       <Column gap="6">
         <PageHeader title={t('billing.title')} showBorder={false} />
+
+        {(events || websites) && (
+          <Column gap="2">
+            {websites && (
+              <Text color={websites.limited ? 'red' : undefined}>
+                {websites.limit === null
+                  ? t('billing.websites-usage-unlimited', { count: websites.count })
+                  : t('billing.websites-usage', { count: websites.count, limit: websites.limit })}
+              </Text>
+            )}
+
+            {events && (
+              <Text color={events.limited ? 'red' : undefined}>
+                {events.limit === null
+                  ? t('billing.events-usage-unlimited', { count: events.count })
+                  : t('billing.events-usage', { count: events.count, limit: events.limit })}
+              </Text>
+            )}
+
+            {(events?.limited || websites?.limited) && (
+              <>
+                {websites?.limited && (
+                  <Text color="red" size="sm">
+                    {t('billing.website-limit-reached', { limit: websites.limit })}
+                  </Text>
+                )}
+                {events?.limited && (
+                  <Text color="red" size="sm">
+                    {t('billing.event-limit-reached', { limit: events.limit })}
+                  </Text>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onPress={() => router.push(renderUrl('/settings/recharge'))}
+                >
+                  {t('recharge.title')}
+                </Button>
+              </>
+            )}
+          </Column>
+        )}
 
         <Grid
           columns={{ base: '1fr', md: '1fr 1fr', xl: 'repeat(4, 1fr)' }}

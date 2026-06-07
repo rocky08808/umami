@@ -1,9 +1,10 @@
+import { getCurrentPlanId, getPlanLimits, isWithinLimit } from '@/lib/billing';
+import { useBillingUsageQuery } from './queries/useBillingUsageQuery';
 import { useConfig } from './useConfig';
 import { useLoginQuery } from './queries/useLoginQuery';
 import { useTeamMembersQuery } from './queries/useTeamMembersQuery';
 import { useUserWebsitesQuery } from './queries/useUserWebsitesQuery';
 import { useSubscription } from './useSubscription';
-import { getCurrentPlanId, getPlanLimits, isWithinLimit } from '@/lib/billing';
 
 function useBillingEnabled() {
   const config = useConfig();
@@ -48,5 +49,20 @@ export function useTeamMemberLimitStatus(teamId: string) {
     limited: !isWithinLimit(count, limit),
     limit,
     count,
+  };
+}
+
+export function useEventLimitStatus() {
+  const billingEnabled = useBillingEnabled();
+  const { data } = useBillingUsageQuery();
+
+  if (!billingEnabled || !data?.events) {
+    return { limited: false, limit: null, count: 0 };
+  }
+
+  return {
+    limited: data.events.limited,
+    limit: data.events.limit,
+    count: data.events.count,
   };
 }

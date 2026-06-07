@@ -3,6 +3,7 @@ import { isbot } from 'isbot';
 import { serializeError } from 'serialize-error';
 import { z } from 'zod';
 import clickhouse from '@/lib/clickhouse';
+import { canCollectWebsiteEvent, recordWebsiteEvent } from '@/lib/billing-events';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
 import { getSalt, hash, secret, uuid } from '@/lib/crypto';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
@@ -96,9 +97,12 @@ export async function POST(request: Request) {
     } = payload;
 
     const sourceId = websiteId || pixelId || linkId;
+    const savesEvent =
+      type === COLLECTION_TYPE.event || type === COLLECTION_TYPE.performance;
 
     // Cache check
     let cache: Cache | null = null;
+    let website = null;
 
     if (websiteId) {
       const cacheHeader = request.headers.get('x-umami-cache');
@@ -111,13 +115,16 @@ export async function POST(request: Request) {
         }
       }
 
-      // Find website
-      if (!cache?.websiteId) {
-        const website = await fetchWebsite(websiteId);
+      if (!cache?.websiteId || savesEvent) {
+        website = await fetchWebsite(websiteId);
 
         if (!website) {
           return badRequest({ message: 'Website not found.' });
         }
+      }
+
+      if (savesEvent && website && !(await canCollectWebsiteEvent(website))) {
+        return json({ beep: 'boop' });
       }
     }
 
@@ -173,6 +180,8 @@ export async function POST(request: Request) {
       visitId = uuid(sessionId, visitSalt);
       iat = now;
     }
+
+    let recordedEvent = false;
 
     if (type === COLLECTION_TYPE.event) {
       const base = hostname ? `https://${hostname}` : 'https://localhost';
@@ -269,6 +278,7 @@ export async function POST(request: Request) {
         lifatid,
         twclid,
       });
+      recordedEvent = true;
     } else if (type === COLLECTION_TYPE.identify) {
       if (data) {
         await saveSessionData({
@@ -306,6 +316,11 @@ export async function POST(request: Request) {
         ttfb,
         createdAt,
       });
+      recordedEvent = true;
+    }
+
+    if (recordedEvent && website) {
+      await recordWebsiteEvent(website);
     }
 
     const token = createToken({ websiteId, sessionId, visitId, iat }, secret());

@@ -1,8 +1,9 @@
 import type { Subscription } from '@/components/hooks/useSubscription';
 import { getCurrentPlanId, getPlanLimits, isWithinLimit, type PlanId } from '@/lib/billing';
+import { getUserSubscription, planToSubscription } from '@/lib/subscription';
 
 export { isWithinLimit };
-import { getUserSubscription, planToSubscription } from '@/lib/subscription';
+import { getOwnerWebsiteCount } from '@/queries/prisma/billing';
 import { getTeamOwner } from '@/queries/prisma/team';
 
 export function isSelfHostedBilling() {
@@ -34,6 +35,18 @@ export async function getWebsiteOwnerId(website: {
   }
 
   return website.userId ?? null;
+}
+
+export async function getOwnerWebsiteUsage(userId: string) {
+  const { limits } = await getUserPlanLimits(userId);
+  const limit = limits.websites;
+  const count = await getOwnerWebsiteCount(userId);
+
+  return {
+    count,
+    limit,
+    limited: limit !== null && !isWithinLimit(count, limit),
+  };
 }
 
 export async function getWebsiteOwnerSubscription(website: {
