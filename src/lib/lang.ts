@@ -102,6 +102,49 @@ export const languages = {
   'zh-TW': { label: '中文(繁體)', dateLocale: zhTW },
 };
 
+const LANGUAGE_DEFAULTS: Record<string, string> = {
+  en: 'en-US',
+  pt: 'pt-PT',
+  zh: 'zh-CN',
+};
+
+export function getBrowserLocale(fallback = 'en-US') {
+  if (typeof window === 'undefined') {
+    return fallback;
+  }
+
+  const supported = Object.keys(languages);
+  const browserLanguages = navigator.languages?.length
+    ? [...navigator.languages]
+    : [navigator.language];
+
+  for (const lang of browserLanguages) {
+    const normalized = lang.replace('_', '-');
+
+    const exact = supported.find(locale => locale.toLowerCase() === normalized.toLowerCase());
+    if (exact) {
+      return exact;
+    }
+
+    const prefix = normalized.split('-')[0]?.toLowerCase();
+    if (!prefix) {
+      continue;
+    }
+
+    const preferred = LANGUAGE_DEFAULTS[prefix];
+    if (preferred && supported.includes(preferred)) {
+      return preferred;
+    }
+
+    const partial = supported.find(locale => locale.toLowerCase().startsWith(`${prefix}-`));
+    if (partial) {
+      return partial;
+    }
+  }
+
+  return fallback;
+}
+
 export function getDateLocale(locale: string) {
   return languages[locale]?.dateLocale || enUS;
 }

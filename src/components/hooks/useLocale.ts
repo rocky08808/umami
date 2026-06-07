@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { LOCALE_CONFIG } from '@/lib/constants';
+import { DEFAULT_LOCALE, LOCALE_CONFIG } from '@/lib/constants';
 import { httpGet } from '@/lib/fetch';
-import { getDateLocale, getTextDirection } from '@/lib/lang';
-import { setItem } from '@/lib/storage';
+import { getBrowserLocale, getDateLocale, getTextDirection } from '@/lib/lang';
+import { getItem, setItem } from '@/lib/storage';
 import { setLocale, useApp } from '@/store/app';
 import enUS from '../../../public/intl/messages/en-US.json';
 import { useForceUpdate } from './useForceUpdate';
@@ -49,10 +49,18 @@ export function useLocale() {
 
   useEffect(() => {
     const url = new URL(window?.location?.href);
-    const locale = url.searchParams.get('locale');
+    const urlLocale = url.searchParams.get('locale');
 
-    if (locale) {
-      saveLocale(locale);
+    if (urlLocale) {
+      saveLocale(urlLocale);
+      return;
+    }
+
+    if (!getItem(LOCALE_CONFIG) && !process.env.defaultLocale) {
+      const browserLocale = getBrowserLocale(DEFAULT_LOCALE);
+      if (browserLocale !== locale) {
+        saveLocale(browserLocale);
+      }
     }
   }, []);
 
