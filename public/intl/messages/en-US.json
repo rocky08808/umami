@@ -503,5 +503,23 @@
     "admin-note": "Admin note (optional)",
     "approve": "Approve",
     "reject": "Reject"
+  },
+  "recharge": {
+    "title": "Recharge",
+    "description": "Top up your subscription with USDT. Payments are reviewed manually.",
+    "select-plan": "Select plan",
+    "payment-info": "Payment details",
+    "amount": "Amount",
+    "network": "Network",
+    "wallet-address": "USDT wallet address",
+    "wallet-not-configured": "Wallet address is not configured.",
+    "account": "Account",
+    "valid-days": "{days} days subscription",
+    "step-1": "1. Transfer the exact USDT amount to the wallet address above.",
+    "step-2": "2. Use the TRC20 network only.",
+    "step-3": "3. Fill in your transaction ID and submit for manual review.",
+    "tx-id": "Transaction ID",
+    "tx-id-placeholder": "Paste your USDT transaction ID / hash",
+    "submit-payment": "I have paid, submit for review"
   }
 }

@@ -18,5 +18,7 @@ export async function GET(request: Request) {
     trackerScriptName: process.env.TRACKER_SCRIPT_NAME,
     updatesDisabled: !!process.env.DISABLE_UPDATES,
     currentVersion: !!process.env.currentVersion,
+    usdtWalletAddress: process.env.USDT_WALLET_ADDRESS || '',
+    usdtNetwork: process.env.USDT_NETWORK || 'TRC20',
   });
 }

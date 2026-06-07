@@ -491,5 +491,23 @@
     "admin-note": "管理员备注（可选）",
     "approve": "通过",
     "reject": "拒绝"
+  },
+  "recharge": {
+    "title": "充值",
+    "description": "使用 USDT 充值订阅，支付后由人工审核开通。",
+    "select-plan": "选择方案",
+    "payment-info": "支付信息",
+    "amount": "充值金额",
+    "network": "网络",
+    "wallet-address": "USDT 收款地址",
+    "wallet-not-configured": "收款地址尚未配置。",
+    "account": "账户",
+    "valid-days": "{days} 天订阅",
+    "step-1": "1. 向以上地址转入对应金额的 USDT。",
+    "step-2": "2. 请仅使用 TRC20 网络转账。",
+    "step-3": "3. 填写交易 ID 后提交，等待人工审核。",
+    "tx-id": "交易 ID",
+    "tx-id-placeholder": "粘贴 USDT 交易 ID / 哈希",
+    "submit-payment": "我已支付，提交审核"
   }
 }

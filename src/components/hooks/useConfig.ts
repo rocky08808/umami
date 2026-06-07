@@ -11,6 +11,8 @@ export type Config = {
   telemetryDisabled: boolean;
   trackerScriptName?: string;
   updatesDisabled: boolean;
+  usdtWalletAddress?: string;
+  usdtNetwork?: string;
 };
 
 export function useConfig(): Config {

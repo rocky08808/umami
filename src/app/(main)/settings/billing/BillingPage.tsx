@@ -1,9 +1,10 @@
 'use client';
 import { Button, Column, Grid, Icon, Row, Text } from '@umami/react-zen';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
-import { useSubscription } from '@/components/hooks';
+import { useNavigation, useSubscription } from '@/components/hooks';
 import { Check } from '@/components/icons';
 import { getCurrentPlanId, PLANS, type PlanId } from '@/lib/billing';
 
@@ -100,6 +101,8 @@ function PlanCard({
 
 export function BillingPage() {
   const t = useTranslations();
+  const router = useRouter();
+  const { renderUrl } = useNavigation();
   const subscription = useSubscription();
   const currentPlanId = getCurrentPlanId(subscription);
 
@@ -109,7 +112,7 @@ export function BillingPage() {
       return;
     }
 
-    window.open('mailto:timmy088088@gmail.com?subject=Plan%20upgrade', '_blank');
+    router.push(renderUrl('/settings/recharge', { plan: planId }));
   };
 
   return (

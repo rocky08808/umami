@@ -2,7 +2,7 @@ import { Column, Focusable, Row, Text, Tooltip, TooltipTrigger } from '@umami/re
 import Link from '@/components/common/Link';
 import { IconLabel } from '@/components/common/IconLabel';
 import { useMessages, useNavigation } from '@/components/hooks';
-import { ArrowLeft, CreditCard, Settings2, UserCircle, Users } from '@/components/icons';
+import { ArrowLeft, CreditCard, Settings2, UserCircle, Users, Wallet } from '@/components/icons';
 
 export function SettingsNav({
   isCollapsed,
@@ -51,6 +51,12 @@ export function SettingsNav({
           label: t(labels.billing),
           path: renderUrl('/settings/billing'),
           icon: <CreditCard />,
+        },
+        {
+          id: 'recharge',
+          label: t(labels.recharge),
+          path: renderUrl('/settings/recharge'),
+          icon: <Wallet />,
         },
       ],
     },
