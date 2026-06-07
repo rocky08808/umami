@@ -93,7 +93,7 @@ export function SideNav(props: any) {
         <Row paddingX="3" alignItems="center" justifyContent="space-between" flexGrow="1">
           {!isCollapsed && (
             <IconLabel icon={<Logo />}>
-              <Text weight="bold">umami</Text>
+              <Text weight="bold">statistics</Text>
             </IconLabel>
           )}
           <PanelButton />
