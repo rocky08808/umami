@@ -489,6 +489,7 @@
     "order-error": "订单处理失败。",
     "admin-title": "账单订单",
     "admin-note": "管理员备注（可选）",
+    "admin-note-label": "管理员备注",
     "approve": "通过",
     "reject": "拒绝"
   },
@@ -508,6 +509,26 @@
     "step-3": "3. 填写交易 ID 后提交，等待人工审核。",
     "tx-id": "交易 ID",
     "tx-id-placeholder": "粘贴 USDT 交易 ID / 哈希",
-    "submit-payment": "我已支付，提交审核"
+    "submit-payment": "我已支付，提交审核",
+    "order-no": "订单号",
+    "plan": "方案",
+    "status": "状态",
+    "status-pending": "待审核",
+    "status-approved": "已通过",
+    "status-rejected": "已拒绝",
+    "my-orders": "我的订单",
+    "order-submitted": "充值订单已提交。",
+    "order-approved": "订单已通过。",
+    "order-rejected": "订单已拒绝。",
+    "order-error": "订单处理失败。",
+    "tx-id-duplicate": "该交易 ID 已提交过。",
+    "order-limit-reached": "每位用户最多提交 {limit} 个未审核订单。",
+    "tx-id-invalid": "交易 ID 格式不正确。",
+    "tx-id-required": "请填写交易 ID。",
+    "admin-title": "充值审核",
+    "admin-note": "管理员备注（可选）",
+    "admin-note-label": "管理员备注",
+    "approve": "通过",
+    "reject": "拒绝"
   }
 }

@@ -10,6 +10,8 @@ export * from './context/useUser';
 export * from './context/useWebsite';
 
 // Query hooks
+export * from './queries/useAdminRechargeOrdersQuery';
+export * from './queries/useRechargeOrdersQuery';
 export * from './queries/useActiveUsersQuery';
 export * from './queries/useBoardQuery';
 export * from './queries/useBoardSharesQuery';

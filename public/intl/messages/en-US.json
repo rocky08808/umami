@@ -501,6 +501,7 @@
     "order-error": "Unable to process billing order.",
     "admin-title": "Billing orders",
     "admin-note": "Admin note (optional)",
+    "admin-note-label": "Admin note",
     "approve": "Approve",
     "reject": "Reject"
   },
@@ -520,6 +521,26 @@
     "step-3": "3. Fill in your transaction ID and submit for manual review.",
     "tx-id": "Transaction ID",
     "tx-id-placeholder": "Paste your USDT transaction ID / hash",
-    "submit-payment": "I have paid, submit for review"
+    "submit-payment": "I have paid, submit for review",
+    "order-no": "Order No.",
+    "plan": "Plan",
+    "status": "Status",
+    "status-pending": "Pending review",
+    "status-approved": "Approved",
+    "status-rejected": "Rejected",
+    "my-orders": "My orders",
+    "order-submitted": "Recharge order submitted.",
+    "order-approved": "Order approved.",
+    "order-rejected": "Order rejected.",
+    "order-error": "Unable to process recharge order.",
+    "tx-id-duplicate": "This transaction ID was already submitted.",
+    "order-limit-reached": "Each user can submit up to {limit} pending orders.",
+    "tx-id-invalid": "Transaction ID format is invalid.",
+    "tx-id-required": "Transaction ID is required.",
+    "admin-title": "Recharge review",
+    "admin-note": "Admin note (optional)",
+    "admin-note-label": "Admin note",
+    "approve": "Approve",
+    "reject": "Reject"
   }
 }

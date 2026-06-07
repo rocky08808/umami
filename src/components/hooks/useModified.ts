@@ -7,7 +7,10 @@ export function touch(key: string) {
 }
 
 export function useModified(key?: string) {
-  const modified = store(state => state?.[key]);
+  const modified = store(state => (key ? state?.[key] : undefined));
 
-  return { modified, touch };
+  return {
+    modified,
+    touch: (touchKey?: string) => touch(touchKey ?? key),
+  };
 }

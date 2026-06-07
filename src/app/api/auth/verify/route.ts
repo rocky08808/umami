@@ -1,4 +1,5 @@
 import { fetchAccount, fetchTeam } from '@/lib/load';
+import { getUserSubscription } from '@/lib/subscription';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
 import { getAllUserTeams } from '@/queries/prisma';
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
 
     return json({ ...user, teams: teamsWithSubscription });
   }
+
+  user.subscription = await getUserSubscription(user.id);
 
   return json({ ...user, teams });
 }

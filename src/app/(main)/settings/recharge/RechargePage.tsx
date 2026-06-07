@@ -7,6 +7,7 @@ import {
   Row,
   Text,
   TextField,
+  useToast,
 } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
@@ -14,18 +15,28 @@ import { useEffect, useState } from 'react';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useConfig, useLoginQuery } from '@/components/hooks';
-import { RECHARGE_OPTIONS, getRechargeOption } from '@/lib/recharge';
-
-const SUPPORT_EMAIL = 'timmy088088@gmail.com';
+import { useApi, useConfig, useLoginQuery, useModified, useRechargeOrdersQuery } from '@/components/hooks';
+import {
+  RECHARGE_MAX_PENDING_ORDERS_PER_USER,
+  RECHARGE_OPTIONS,
+  RECHARGE_ORDER_STATUS,
+  getRechargeOption,
+  normalizeTxId,
+} from '@/lib/recharge';
+import { RechargeOrdersList } from './RechargeOrdersList';
 
 export function RechargePage() {
   const t = useTranslations();
   const searchParams = useSearchParams();
   const config = useConfig();
   const { user } = useLoginQuery();
+  const { post } = useApi();
+  const { toast } = useToast();
+  const { touch } = useModified('recharge-orders');
+  const { data: orders = [] } = useRechargeOrdersQuery();
   const [selectedPlan, setSelectedPlan] = useState(RECHARGE_OPTIONS[0].plan);
   const [txId, setTxId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const plan = searchParams.get('plan');
@@ -37,27 +48,36 @@ export function RechargePage() {
   const option = getRechargeOption(selectedPlan) || RECHARGE_OPTIONS[0];
   const walletAddress = config?.usdtWalletAddress || '';
   const network = config?.usdtNetwork || 'TRC20';
+  const pendingOrderCount = orders.filter(
+    (order: any) => order.status === RECHARGE_ORDER_STATUS.pending,
+  ).length;
+  const orderLimitReached = pendingOrderCount >= RECHARGE_MAX_PENDING_ORDERS_PER_USER;
 
-  const handleConfirmPayment = () => {
-    const trimmedTxId = txId.trim();
+  const handleConfirmPayment = async () => {
+    const normalizedTxId = normalizeTxId(txId);
 
-    if (!trimmedTxId) {
+    if (!normalizedTxId) {
       return;
     }
 
-    const subject = encodeURIComponent(`Recharge ${selectedPlan} - ${user?.username || ''}`);
-    const body = encodeURIComponent(
-      [
-        `Plan: ${selectedPlan}`,
-        `Amount: ${option.amount} USDT`,
-        `Network: ${network}`,
-        `Username: ${user?.username || ''}`,
-        `User ID: ${user?.id || ''}`,
-        `Transaction ID: ${trimmedTxId}`,
-      ].join('\n'),
-    );
+    setSubmitting(true);
 
-    window.open(`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+    try {
+      await post('/recharge/orders', {
+        plan: selectedPlan,
+        txId: normalizedTxId,
+        network,
+      });
+      toast(t('recharge.order-submitted'));
+      setTxId('');
+      touch('recharge-orders');
+    } catch (e: any) {
+      toast(
+        (e.code && t(`recharge.${e.code}`)) || e.message || t('recharge.order-error'),
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -145,16 +165,24 @@ export function RechargePage() {
                 />
               </Column>
 
+              {orderLimitReached && (
+                <Text color="muted" size="sm">
+                  {t('recharge.order-limit-reached', { limit: RECHARGE_MAX_PENDING_ORDERS_PER_USER })}
+                </Text>
+              )}
+
               <Button
                 variant="primary"
                 onPress={handleConfirmPayment}
-                isDisabled={!walletAddress || !txId.trim()}
+                isDisabled={!walletAddress || !txId.trim() || submitting || orderLimitReached}
               >
                 {t('recharge.submit-payment')}
               </Button>
             </Column>
           </Panel>
         </Grid>
+
+        <RechargeOrdersList />
       </Column>
     </PageBody>
   );
