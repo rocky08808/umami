@@ -1,10 +1,22 @@
 'use client';
-import { AlertBanner, Button, Column, Row, Text, TextField, useToast } from '@umami/react-zen';
+import {
+  AlertBanner,
+  Button,
+  Column,
+  Loading,
+  LoadingButton,
+  Row,
+  Text,
+  TextField,
+  useToast,
+} from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BillingLimitNotice } from '@/components/common/BillingLimitNotice';
 import { useApi, useConfig, useMessages, useModified, useWebsiteLimitStatus } from '@/components/hooks';
-import { isValidDomain, parseBatchDomains } from '@/lib/websites';
+import { isValidDomain, MAX_BATCH_WEBSITES, parseBatchDomains } from '@/lib/websites';
+
+const MAX_BATCH_SIZE = MAX_BATCH_WEBSITES;
 
 type CreatedWebsite = {
   id: string;
@@ -12,6 +24,33 @@ type CreatedWebsite = {
   domain: string;
   shareId: string | null;
 };
+
+function getBatchErrorMessage(
+  t: ReturnType<typeof useTranslations>,
+  error: { code?: string; message?: string; remaining?: number; max?: number },
+) {
+  if (error.code === 'batch-websites-limit-exceeded' && error.remaining != null) {
+    return t('message.batch-websites-limit-exceeded', { remaining: error.remaining });
+  }
+
+  if (error.code === 'batch-websites-too-many') {
+    return t('message.batch-websites-too-many', { max: error.max ?? MAX_BATCH_SIZE });
+  }
+
+  if (error.code && error.code !== 'bad-request') {
+    return t(`message.${error.code}`);
+  }
+
+  if (error.message && error.message !== 'Bad request') {
+    return error.message;
+  }
+
+  if (error.code === 'bad-request') {
+    return t('message.bad-request');
+  }
+
+  return t('message.error');
+}
 
 export function WebsiteBatchAddForm({
   teamId,
@@ -48,6 +87,11 @@ export function WebsiteBatchAddForm({
   const invalidDomains = domains.filter(domain => !isValidDomain(domain));
   const remaining = limit === null ? null : Math.max(0, limit - count);
   const exceedsLimit = remaining !== null && domains.length > remaining;
+  const exceedsBatchSize = domains.length > MAX_BATCH_SIZE;
+  const payloadDomains = useMemo(() => {
+    const capped = domains.slice(0, MAX_BATCH_SIZE);
+    return remaining === null ? capped : capped.slice(0, remaining);
+  }, [domains, remaining]);
 
   const getShareUrl = (slug: string) => {
     const origin = cloudMode ? process.env.cloudUrl : window?.location.origin;
@@ -121,11 +165,9 @@ export function WebsiteBatchAddForm({
   };
 
   const handleSubmit = async () => {
-    if (!domains.length || limited || exceedsLimit || invalidDomains.length) {
+    if (!domains.length || limited || exceedsLimit || exceedsBatchSize || invalidDomains.length) {
       return;
     }
-
-    const payloadDomains = remaining === null ? domains : domains.slice(0, remaining);
 
     setSubmitting(true);
     setError(null);
@@ -152,7 +194,7 @@ export function WebsiteBatchAddForm({
         toast(t('message.batch-websites-partial-failed', { count: failedCount }));
       }
     } catch (e: any) {
-      setError((e.code && t(`message.${e.code}`)) || e.message || t('message.error'));
+      setError(getBatchErrorMessage(t, e));
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +240,9 @@ export function WebsiteBatchAddForm({
   }
 
   return (
-    <Column gap="4">
+    <Column gap="4" position="relative" minHeight={submitting ? '200px' : undefined}>
+      {submitting && <Loading placement="absolute" icon="dots" />}
+
       {limited && limit !== null && (
         <BillingLimitNotice message={t('billing.website-limit-reached', { limit })} />
       )}
@@ -213,13 +257,19 @@ export function WebsiteBatchAddForm({
           value={domainsText}
           onChange={setDomainsText}
           resize="vertical"
-          isDisabled={limited}
+          isDisabled={limited || submitting}
           placeholder={'example.com\nblog.example.com'}
         />
       </Column>
 
       {domains.length > 0 && (
-        <Text size="sm">{t('message.batch-websites-count', { count: domains.length })}</Text>
+        <Text size="sm">{t('message.batch-websites-count', { count: payloadDomains.length })}</Text>
+      )}
+
+      {exceedsBatchSize && (
+        <Text color="red" size="sm">
+          {t('message.batch-websites-too-many', { max: MAX_BATCH_SIZE })}
+        </Text>
       )}
 
       {invalidDomains.length > 0 && (
@@ -246,15 +296,21 @@ export function WebsiteBatchAddForm({
             {tm(labels.cancel)}
           </Button>
         )}
-        <Button
+        <LoadingButton
           variant="primary"
           onPress={handleSubmit}
+          isLoading={submitting}
           isDisabled={
-            limited || submitting || !domains.length || exceedsLimit || invalidDomains.length > 0
+            limited ||
+            submitting ||
+            !domains.length ||
+            exceedsLimit ||
+            exceedsBatchSize ||
+            invalidDomains.length > 0
           }
         >
           {tm(labels.create)}
-        </Button>
+        </LoadingButton>
       </Row>
     </Column>
   );

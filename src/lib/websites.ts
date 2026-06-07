@@ -1,5 +1,7 @@
 import { DOMAIN_REGEX } from '@/lib/constants';
 
+export const MAX_BATCH_WEBSITES = 80;
+
 export function normalizeDomainInput(value: string) {
   let domain = value.trim();
 

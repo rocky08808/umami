@@ -10,9 +10,10 @@ const selector = (state: { shareToken: { token?: string } }) => state.shareToken
 
 async function handleResponse(res: FetchResponse): Promise<any> {
   if (!res.ok) {
-    const { message, code, status } = res?.data?.error || {};
+    const error = res?.data?.error || {};
+    const { message, code, status, ...details } = error;
 
-    return Promise.reject(Object.assign(new Error(message), { code, status }));
+    return Promise.reject(Object.assign(new Error(message), { code, status, ...details }));
   }
   return Promise.resolve(res.data);
 }

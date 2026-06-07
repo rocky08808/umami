@@ -411,6 +411,7 @@
     "batch-websites-partial-failed": "{count, plural, one {# website failed to create; the rest were created} other {# websites failed to create; the rest were created}}",
     "batch-websites-invalid-domain": "{count, plural, one {# invalid domain} other {# invalid domains}}",
     "batch-websites-limit-exceeded": "Exceeds your remaining plan allowance. You can create up to {remaining} more websites.",
+    "batch-websites-too-many": "You can create up to {max} websites per batch",
     "batch-websites-copy-ids": "Copy all IDs",
     "batch-websites-copy-share-urls": "Copy all share links",
     "batch-websites-copy-all": "Copy all",
