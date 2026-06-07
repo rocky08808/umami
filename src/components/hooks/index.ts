@@ -13,6 +13,7 @@ export * from './context/useWebsite';
 export * from './queries/useAdminRechargeOrdersQuery';
 export * from './queries/useBillingUsageQuery';
 export * from './queries/useRechargeOrdersQuery';
+export * from './queries/useWalletQuery';
 export * from './queries/useActiveUsersQuery';
 export * from './queries/useBoardQuery';
 export * from './queries/useBoardSharesQuery';

@@ -15,7 +15,16 @@ import { useEffect, useState } from 'react';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useApi, useConfig, useLoginQuery, useModified, useRechargeOrdersQuery } from '@/components/hooks';
+import Link from '@/components/common/Link';
+import {
+  useApi,
+  useConfig,
+  useLoginQuery,
+  useModified,
+  useNavigation,
+  useRechargeOrdersQuery,
+  useWalletQuery,
+} from '@/components/hooks';
 import {
   RECHARGE_MAX_PENDING_ORDERS_PER_USER,
   RECHARGE_OPTIONS,
@@ -28,6 +37,7 @@ import { WalletAddressQrCode } from './WalletAddressQrCode';
 
 export function RechargePage() {
   const t = useTranslations();
+  const { renderUrl } = useNavigation();
   const searchParams = useSearchParams();
   const config = useConfig();
   const { user } = useLoginQuery();
@@ -35,6 +45,7 @@ export function RechargePage() {
   const { toast } = useToast();
   const { touch } = useModified('recharge-orders');
   const { data: orders = [] } = useRechargeOrdersQuery();
+  const { data: wallet } = useWalletQuery();
   const [selectedPlan, setSelectedPlan] = useState(RECHARGE_OPTIONS[0].plan);
   const [txId, setTxId] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -89,6 +100,17 @@ export function RechargePage() {
           description={t('recharge.description')}
           showBorder={false}
         />
+
+        {wallet && (
+          <Row alignItems="center" gap="2">
+            <Text color="muted">
+              {t('balance.current-balance')}: {wallet.balance} {wallet.currency}
+            </Text>
+            <Link href={renderUrl('/settings/balance', false)}>
+              <Text color="primary">{t('balance.title')}</Text>
+            </Link>
+          </Row>
+        )}
 
         <Grid columns={{ base: '1fr', lg: '1fr 1.2fr' }} gap="4" alignItems="start">
           <Panel title={t('recharge.select-plan')}>

@@ -558,6 +558,26 @@
     "unlimited": "无限制",
     "upgrade-plan": "升级方案"
   },
+  "balance": {
+    "title": "余额",
+    "description": "查看账户余额，使用余额购买或续费订阅方案。",
+    "current-balance": "当前余额",
+    "balance-hint": "充值审核通过后会入账并自动购买对应方案，续费可直接使用余额。",
+    "recharge-link": "前往 USDT 充值",
+    "subscribe-with-balance": "余额购买",
+    "subscribe-description": "使用账户余额直接购买或续费订阅，无需再次转账。",
+    "subscribe-button": "使用余额购买",
+    "subscribe-success": "订阅已开通。",
+    "subscribe-error": "购买失败，请稍后重试。",
+    "insufficient-balance": "余额不足，请先充值。",
+    "invalid-plan": "方案无效。",
+    "wallet-unavailable": "余额功能不可用。",
+    "transactions": "交易记录",
+    "no-transactions": "暂无交易记录。",
+    "type-credit": "入账",
+    "type-debit": "支出",
+    "balance-after": "余额 {amount}"
+  },
   "recharge": {
     "title": "充值",
     "description": "使用 USDT 充值订阅，支付后由人工审核开通。",

@@ -384,6 +384,7 @@ export const labels: Record<string, string> = {
   upgrade: 'label.upgrade',
   billing: 'billing.title',
   usage: 'usage.title',
+  balance: 'balance.title',
   recharge: 'recharge.title',
   integration: 'integration.title',
   rechargeReview: 'recharge.admin-title',

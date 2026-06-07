@@ -570,6 +570,26 @@
     "unlimited": "Unlimited",
     "upgrade-plan": "Upgrade plan"
   },
+  "balance": {
+    "title": "Balance",
+    "description": "View your account balance and purchase or renew plans with it.",
+    "current-balance": "Current balance",
+    "balance-hint": "Approved recharge orders are credited and used to purchase the selected plan. Renew with your balance anytime.",
+    "recharge-link": "Go to USDT recharge",
+    "subscribe-with-balance": "Purchase with balance",
+    "subscribe-description": "Use your account balance to purchase or renew a plan without another transfer.",
+    "subscribe-button": "Purchase with balance",
+    "subscribe-success": "Subscription activated.",
+    "subscribe-error": "Unable to complete purchase. Please try again.",
+    "insufficient-balance": "Insufficient balance. Please recharge first.",
+    "invalid-plan": "Invalid plan.",
+    "wallet-unavailable": "Wallet is not available.",
+    "transactions": "Transactions",
+    "no-transactions": "No transactions yet.",
+    "type-credit": "Credit",
+    "type-debit": "Debit",
+    "balance-after": "Balance {amount}"
+  },
   "recharge": {
     "title": "Recharge",
     "description": "Top up your subscription with USDT. Payments are reviewed manually.",
