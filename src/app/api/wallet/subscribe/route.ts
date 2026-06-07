@@ -1,4 +1,4 @@
-import type { PlanId } from '@/lib/billing';
+import { canSubscribeToPlan, type PlanId } from '@/lib/billing';
 import { uuid } from '@/lib/crypto';
 import { isSelfHostedBilling } from '@/lib/billing-limits';
 import { parseRequest } from '@/lib/request';
@@ -8,7 +8,7 @@ import {
   RECHARGE_SUBSCRIPTION_DAYS,
   getRechargeOption,
 } from '@/lib/recharge';
-import { activateSubscription } from '@/lib/subscription';
+import { activateSubscription, getUserSubscriptionDetails } from '@/lib/subscription';
 import { debitWallet, WALLET_REFERENCE_TYPE } from '@/lib/wallet';
 
 export async function POST(request: Request) {
@@ -27,6 +27,15 @@ export async function POST(request: Request) {
 
   if (!option) {
     return badRequest({ message: 'Invalid plan.', code: 'invalid-plan' });
+  }
+
+  const subscription = await getUserSubscriptionDetails(auth.user.id);
+
+  if (!canSubscribeToPlan(subscription, option.plan)) {
+    return badRequest({
+      message: 'Business plan must expire before subscribing to Pro.',
+      code: 'business-active',
+    });
   }
 
   try {

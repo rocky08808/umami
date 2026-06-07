@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { CopyButton } from '@/components/common/CopyButton';
 import { DateDistance } from '@/components/common/DateDistance';
 import { RechargeOrderStatusBadge } from '@/app/(main)/settings/recharge/RechargeOrderStatusBadge';
+import { formatAmountDisplay, getRechargeOrderLabelKey } from '@/lib/recharge';
 import { truncateMiddle } from './rechargeOrderUtils';
 import { useRechargeOrderReview } from './useRechargeOrderReview';
 
@@ -43,7 +44,7 @@ export function AdminRechargeOrdersCards({ data = [] }: { data: any[] }) {
               <Text color="muted" size="sm">
                 {t('recharge.plan')}
               </Text>
-              <Text>{t(`billing.plan-${row.plan}`)}</Text>
+              <Text>{t(getRechargeOrderLabelKey(row.plan))}</Text>
             </Column>
 
             <Column gap="1" style={{ minWidth: 120 }}>
@@ -51,7 +52,7 @@ export function AdminRechargeOrdersCards({ data = [] }: { data: any[] }) {
                 {t('recharge.amount')}
               </Text>
               <Text>
-                {row.amount} {row.currency}
+                {formatAmountDisplay(row.amount)} {row.currency}
               </Text>
             </Column>
 

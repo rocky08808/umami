@@ -8,6 +8,7 @@ import {
   getWalletTransactions,
   updateWalletBalance,
 } from '@/queries/prisma/wallet';
+import { roundAmount } from '@/lib/recharge';
 import { WALLET_REFERENCE_TYPE, WALLET_TRANSACTION_TYPE } from '@/lib/wallet-constants';
 
 export { WALLET_REFERENCE_TYPE, WALLET_TRANSACTION_TYPE };
@@ -17,7 +18,7 @@ export function toWalletAmount(value: Prisma.Decimal | number | string) {
 }
 
 export function formatWalletAmount(value: Prisma.Decimal | number | string) {
-  return Number(toWalletAmount(value).toFixed(2));
+  return roundAmount(Number(toWalletAmount(value)));
 }
 
 export async function getUserWalletSummary(userId: string, limit = 20) {

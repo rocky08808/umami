@@ -1,9 +1,9 @@
 import {
+  RECHARGE_BALANCE_PLAN,
   RECHARGE_MAX_PENDING_ORDERS_PER_USER,
-  RECHARGE_OPTIONS,
-  RECHARGE_SUBSCRIPTION_DAYS,
-  getRechargeOption,
   normalizeTxId,
+  parseRechargeAmount,
+  planToRechargeAmount,
 } from '@/lib/recharge';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json } from '@/lib/response';
@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const plan = body?.plan;
-  const option = getRechargeOption(plan);
+  const rawAmount = body?.amount != null ? body.amount : planToRechargeAmount(String(body?.plan || ''));
+  const amount = parseRechargeAmount(rawAmount);
 
-  if (!option) {
-    return badRequest({ message: 'Invalid plan.', code: 'invalid-plan' });
+  if (amount == null) {
+    return badRequest({ message: 'Invalid amount.', code: 'invalid-amount' });
   }
 
   const txId = normalizeTxId(String(body?.txId || ''));
@@ -75,12 +75,12 @@ export async function POST(request: Request) {
 
   const order = await createRechargeOrder({
     userId: auth.user.id,
-    plan,
-    amount: option.amount,
+    plan: RECHARGE_BALANCE_PLAN,
+    amount,
     currency: 'USDT',
     network: body?.network || process.env.USDT_NETWORK || 'TRC20',
     txId,
-    periodDays: RECHARGE_SUBSCRIPTION_DAYS,
+    periodDays: 0,
   });
 
   void notifyRechargeOrderSubmitted({

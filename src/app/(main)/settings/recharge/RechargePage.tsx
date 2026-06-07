@@ -26,11 +26,16 @@ import {
   useWalletQuery,
 } from '@/components/hooks';
 import {
+  RECHARGE_AMOUNT_OPTIONS,
+  RECHARGE_MAX_AMOUNT,
   RECHARGE_MAX_PENDING_ORDERS_PER_USER,
-  RECHARGE_OPTIONS,
+  RECHARGE_MIN_AMOUNT,
   RECHARGE_ORDER_STATUS,
-  getRechargeOption,
+  formatAmountDisplay,
   normalizeTxId,
+  parseRechargeAmount,
+  planToRechargeAmount,
+  sanitizeRechargeAmountInput,
 } from '@/lib/recharge';
 import { RechargeOrdersList } from './RechargeOrdersList';
 import { WalletAddressQrCode } from './WalletAddressQrCode';
@@ -46,18 +51,26 @@ export function RechargePage() {
   const { touch } = useModified('recharge-orders');
   const { data: orders = [] } = useRechargeOrdersQuery();
   const { data: wallet } = useWalletQuery();
-  const [selectedPlan, setSelectedPlan] = useState(RECHARGE_OPTIONS[0].plan);
+  const [amountInput, setAmountInput] = useState(String(RECHARGE_AMOUNT_OPTIONS[0].amount));
   const [txId, setTxId] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const plan = searchParams.get('plan');
-    if (plan && getRechargeOption(plan)) {
-      setSelectedPlan(plan as typeof selectedPlan);
+    const amountParam = searchParams.get('amount');
+    const planParam = searchParams.get('plan');
+    const amount = amountParam
+      ? parseRechargeAmount(amountParam)
+      : planParam
+        ? planToRechargeAmount(planParam)
+        : null;
+
+    if (amount != null) {
+      setAmountInput(String(amount));
     }
   }, [searchParams]);
 
-  const option = getRechargeOption(selectedPlan) || RECHARGE_OPTIONS[0];
+  const rechargeAmount = parseRechargeAmount(amountInput);
+  const amountInvalid = amountInput.trim() !== '' && rechargeAmount == null;
   const walletAddress = config?.usdtWalletAddress || '';
   const network = config?.usdtNetwork || 'TRC20';
   const pendingOrderCount = orders.filter(
@@ -75,8 +88,12 @@ export function RechargePage() {
     setSubmitting(true);
 
     try {
+      if (rechargeAmount == null) {
+        return;
+      }
+
       await post('/recharge/orders', {
-        plan: selectedPlan,
+        amount: rechargeAmount,
         txId: normalizedTxId,
         network,
       });
@@ -104,7 +121,7 @@ export function RechargePage() {
         {wallet && (
           <Row alignItems="center" gap="2">
             <Text color="muted">
-              {t('balance.current-balance')}: {wallet.balance} {wallet.currency}
+              {t('balance.current-balance')}: {formatAmountDisplay(wallet.balance)} {wallet.currency}
             </Text>
             <Link href={renderUrl('/settings/balance', false)}>
               <Text color="primary">{t('balance.title')}</Text>
@@ -113,33 +130,48 @@ export function RechargePage() {
         )}
 
         <Grid columns={{ base: '1fr', lg: '1fr 1.2fr' }} gap="4" alignItems="start">
-          <Panel title={t('recharge.select-plan')}>
-            <Column gap="3">
-              {RECHARGE_OPTIONS.map(item => {
-                const isSelected = item.plan === selectedPlan;
+          <Panel title={t('recharge.select-amount')}>
+            <Column gap="4">
+              <Column gap="1">
+                <Label>{t('recharge.amount')}</Label>
+                <TextField
+                  value={amountInput}
+                  onChange={value => setAmountInput(sanitizeRechargeAmountInput(value))}
+                  placeholder={t('recharge.amount-placeholder')}
+                />
+                <Text color="muted" size="sm">
+                  {t('recharge.amount-range', {
+                    min: RECHARGE_MIN_AMOUNT,
+                    max: RECHARGE_MAX_AMOUNT,
+                  })}
+                </Text>
+                {amountInvalid && (
+                  <Text color="red" size="sm">
+                    {t('recharge.invalid-amount')}
+                  </Text>
+                )}
+              </Column>
 
-                return (
-                  <Row
-                    key={item.plan}
-                    padding="4"
-                    border
-                    borderRadius
-                    alignItems="center"
-                    justifyContent="space-between"
-                    backgroundColor={isSelected ? 'surface-sunken' : undefined}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setSelectedPlan(item.plan)}
-                  >
-                    <Column gap="1">
-                      <Text weight="bold">{t(item.nameKey)}</Text>
-                      <Text color="muted">{t('recharge.valid-days', { days: 30 })}</Text>
-                    </Column>
-                    <Text size="xl" weight="bold">
-                      {item.amount} USDT
-                    </Text>
-                  </Row>
-                );
-              })}
+              <Column gap="2">
+                <Text color="muted" size="sm">
+                  {t('recharge.quick-amounts')}
+                </Text>
+                <Row gap="2" style={{ flexWrap: 'wrap' }}>
+                  {RECHARGE_AMOUNT_OPTIONS.map(item => {
+                    const isSelected = rechargeAmount === item.amount;
+
+                    return (
+                      <Button
+                        key={item.amount}
+                        variant={isSelected ? 'primary' : 'outline'}
+                        onPress={() => setAmountInput(String(item.amount))}
+                      >
+                        {item.amount} USDT
+                      </Button>
+                    );
+                  })}
+                </Row>
+              </Column>
             </Column>
           </Panel>
 
@@ -148,7 +180,7 @@ export function RechargePage() {
               <Column gap="1">
                 <Label>{t('recharge.amount')}</Label>
                 <Text size="2xl" weight="bold">
-                  {option.amount} USDT
+                  {rechargeAmount != null ? `${formatAmountDisplay(rechargeAmount)} USDT` : '—'}
                 </Text>
               </Column>
 
@@ -200,7 +232,13 @@ export function RechargePage() {
               <Button
                 variant="primary"
                 onPress={handleConfirmPayment}
-                isDisabled={!walletAddress || !txId.trim() || submitting || orderLimitReached}
+                isDisabled={
+                  !walletAddress
+                  || !txId.trim()
+                  || submitting
+                  || orderLimitReached
+                  || rechargeAmount == null
+                }
               >
                 {t('recharge.submit-payment')}
               </Button>

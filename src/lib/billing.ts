@@ -155,3 +155,14 @@ const PLAN_RANK: Record<PlanId, number> = {
 export function canUpgradePlan(currentPlanId: PlanId, targetPlanId: PlanId) {
   return PLAN_RANK[targetPlanId] > PLAN_RANK[currentPlanId];
 }
+
+export function canSubscribeToPlan(
+  current: { plan: PlanId; expired?: boolean },
+  targetPlan: PlanId,
+) {
+  if (targetPlan === 'pro' && current.plan === 'business' && !current.expired) {
+    return false;
+  }
+
+  return true;
+}

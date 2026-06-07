@@ -2,11 +2,14 @@
 import { Button, Column, Grid, Icon, Row, Text } from '@umami/react-zen';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Link from '@/components/common/Link';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
-import { useBillingUsageQuery, useNavigation, useSubscription } from '@/components/hooks';
+import { Panel } from '@/components/common/Panel';
+import { useBillingUsageQuery, useNavigation, useSubscription, useWalletQuery } from '@/components/hooks';
 import { Check } from '@/components/icons';
 import { canUpgradePlan, getCurrentPlanId, PLANS, type PlanId } from '@/lib/billing';
+import { formatAmountDisplay } from '@/lib/recharge';
 
 function PlanCard({
   planId,
@@ -105,6 +108,7 @@ export function BillingPage() {
   const { renderUrl } = useNavigation();
   const subscription = useSubscription();
   const { data: usage } = useBillingUsageQuery();
+  const { data: wallet } = useWalletQuery();
   const currentPlanId = getCurrentPlanId(subscription);
   const subscriptionInfo = usage?.subscription;
   const events = usage?.events;
@@ -123,13 +127,34 @@ export function BillingPage() {
       return;
     }
 
-    router.push(renderUrl('/settings/recharge', { plan: planId }));
+    router.push(renderUrl('/settings/balance', { plan: planId }));
   };
 
   return (
     <PageBody>
       <Column gap="6">
         <PageHeader title={t('billing.title')} showBorder={false} />
+
+        {wallet && (
+          <Panel title={t('balance.current-balance')}>
+            <Row alignItems="center" justifyContent="space-between" gap="4" style={{ flexWrap: 'wrap' }}>
+              <Row alignItems="baseline" gap="2">
+                <Text size="2xl" weight="bold">
+                  {formatAmountDisplay(wallet.balance)}
+                </Text>
+                <Text color="muted">{wallet.currency}</Text>
+              </Row>
+              <Row alignItems="center" gap="3">
+                <Link href={renderUrl('/settings/balance', false)}>
+                  <Text color="primary">{t('balance.subscribe-with-balance')}</Text>
+                </Link>
+                <Link href={renderUrl('/settings/recharge', false)}>
+                  <Text color="primary">{t('balance.recharge-link')}</Text>
+                </Link>
+              </Row>
+            </Row>
+          </Panel>
+        )}
 
         {(subscriptionInfo?.expiresAt || events || websites) && (
           <Column gap="2">

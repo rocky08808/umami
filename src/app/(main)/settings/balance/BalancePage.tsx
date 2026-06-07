@@ -3,41 +3,75 @@ import {
   Button,
   Column,
   Grid,
+  Loading,
   Row,
   Text,
   useToast,
 } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from '@/components/common/Link';
 import { DateDistance } from '@/components/common/DateDistance';
-import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useApi, useModified, useNavigation, useWalletQuery } from '@/components/hooks';
+import {
+  useApi,
+  useBillingUsageQuery,
+  useModified,
+  useNavigation,
+  useWalletQuery,
+} from '@/components/hooks';
+import { canSubscribeToPlan, type PlanId } from '@/lib/billing';
 import {
   RECHARGE_OPTIONS,
   RECHARGE_SUBSCRIPTION_DAYS,
+  formatAmountDisplay,
   getRechargeOption,
 } from '@/lib/recharge';
 import { WALLET_TRANSACTION_TYPE } from '@/lib/wallet-constants';
 
+type SubscribePlan = (typeof RECHARGE_OPTIONS)[number]['plan'];
+
 export function BalancePage() {
   const t = useTranslations();
+  const searchParams = useSearchParams();
   const { renderUrl } = useNavigation();
   const { post } = useApi();
   const { toast } = useToast();
   const { touch } = useModified('wallet');
   const { data, isLoading } = useWalletQuery();
-  const [selectedPlan, setSelectedPlan] = useState(RECHARGE_OPTIONS[0].plan);
+  const { data: usage } = useBillingUsageQuery();
+  const [selectedPlan, setSelectedPlan] = useState<SubscribePlan>(RECHARGE_OPTIONS[0].plan);
   const [submitting, setSubmitting] = useState(false);
+
+  const subscription = usage?.subscription ?? { plan: 'hobby' as PlanId, expired: false };
+  const isPlanAllowed = (plan: PlanId) => canSubscribeToPlan(subscription, plan);
+
+  useEffect(() => {
+    const plan = searchParams.get('plan');
+    const requestedPlan = plan && getRechargeOption(plan) ? (plan as SubscribePlan) : null;
+
+    if (requestedPlan && isPlanAllowed(requestedPlan)) {
+      setSelectedPlan(requestedPlan);
+      return;
+    }
+
+    if (!isPlanAllowed(selectedPlan)) {
+      const fallback = RECHARGE_OPTIONS.find(item => isPlanAllowed(item.plan));
+      if (fallback) {
+        setSelectedPlan(fallback.plan);
+      }
+    }
+  }, [searchParams, subscription.plan, subscription.expired, selectedPlan]);
 
   const option = getRechargeOption(selectedPlan) || RECHARGE_OPTIONS[0];
   const balance = data?.balance ?? 0;
   const currency = data?.currency ?? 'USDT';
   const transactions = data?.transactions ?? [];
   const insufficientBalance = balance < option.amount;
+  const planNotAllowed = !isPlanAllowed(selectedPlan);
 
   const handleSubscribe = async () => {
     setSubmitting(true);
@@ -58,7 +92,9 @@ export function BalancePage() {
   if (isLoading) {
     return (
       <PageBody>
-        <LoadingPanel />
+        <Column position="relative" height="100%" width="100%">
+          <Loading />
+        </Column>
       </PageBody>
     );
   }
@@ -77,7 +113,7 @@ export function BalancePage() {
             <Column gap="4">
               <Row alignItems="baseline" gap="2">
                 <Text size="3xl" weight="bold">
-                  {balance}
+                  {formatAmountDisplay(balance)}
                 </Text>
                 <Text size="xl" color="muted">
                   {currency}
@@ -95,6 +131,7 @@ export function BalancePage() {
               <Text color="muted">{t('balance.subscribe-description')}</Text>
               {RECHARGE_OPTIONS.map(item => {
                 const isSelected = item.plan === selectedPlan;
+                const allowed = isPlanAllowed(item.plan);
 
                 return (
                   <Row
@@ -105,17 +142,22 @@ export function BalancePage() {
                     alignItems="center"
                     justifyContent="space-between"
                     backgroundColor={isSelected ? 'surface-sunken' : undefined}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setSelectedPlan(item.plan)}
+                    style={{ cursor: allowed ? 'pointer' : 'not-allowed', opacity: allowed ? 1 : 0.5 }}
+                    onClick={() => allowed && setSelectedPlan(item.plan)}
                   >
                     <Column gap="1">
                       <Text weight="bold">{t(item.nameKey)}</Text>
                       <Text color="muted">
                         {t('recharge.valid-days', { days: RECHARGE_SUBSCRIPTION_DAYS })}
                       </Text>
+                      {!allowed && (
+                        <Text color="red" size="sm">
+                          {t('balance.business-active')}
+                        </Text>
+                      )}
                     </Column>
                     <Text size="xl" weight="bold">
-                      {item.amount} {currency}
+                      {formatAmountDisplay(item.amount)} {currency}
                     </Text>
                   </Row>
                 );
@@ -127,10 +169,16 @@ export function BalancePage() {
                 </Text>
               )}
 
+              {planNotAllowed && (
+                <Text color="red" size="sm">
+                  {t('balance.business-active')}
+                </Text>
+              )}
+
               <Button
                 variant="primary"
                 onPress={handleSubscribe}
-                isDisabled={submitting || insufficientBalance}
+                isDisabled={submitting || insufficientBalance || planNotAllowed}
               >
                 {t('balance.subscribe-button')}
               </Button>
@@ -168,7 +216,7 @@ export function BalancePage() {
                         {transaction.amount} {transaction.currency}
                       </Text>
                       <Text color="muted" size="sm">
-                        {t('balance.balance-after', { amount: transaction.balanceAfter })}
+                        {t('balance.balance-after', { amount: formatAmountDisplay(transaction.balanceAfter) })}
                       </Text>
                     </Column>
                   </Row>

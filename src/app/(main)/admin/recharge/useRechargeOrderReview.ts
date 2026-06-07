@@ -20,13 +20,16 @@ export function useRechargeOrderReview() {
       });
       toast(t(action === 'approve' ? 'recharge.order-approved' : 'recharge.order-rejected'));
       touch('admin-recharge-orders');
+      if (action === 'approve') {
+        touch('wallet');
+      }
       setNote(current => {
         const next = { ...current };
         delete next[orderId];
         return next;
       });
     } catch (e: any) {
-      toast(e.message || t('recharge.order-error'));
+      toast((e.code && t(`recharge.${e.code}`)) || e.message || t('recharge.order-error'));
     } finally {
       setLoadingId(null);
     }

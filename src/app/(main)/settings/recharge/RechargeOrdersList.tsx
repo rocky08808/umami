@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { DateDistance } from '@/components/common/DateDistance';
 import { Panel } from '@/components/common/Panel';
 import { useRechargeOrdersQuery } from '@/components/hooks';
+import { formatAmountDisplay, getRechargeOrderLabelKey } from '@/lib/recharge';
 import { RechargeOrderStatusBadge } from './RechargeOrderStatusBadge';
 
 export function RechargeOrdersList() {
@@ -28,7 +29,7 @@ export function RechargeOrdersList() {
             <Column gap="1">
               <Text weight="bold">{order.orderNo}</Text>
               <Text color="muted" size="sm">
-                {t(`billing.plan-${order.plan}`)} · {order.amount} {order.currency}
+                {t(getRechargeOrderLabelKey(order.plan))} · {formatAmountDisplay(order.amount)} {order.currency}
               </Text>
               <Text color="muted" size="sm" truncate title={order.txId}>
                 {order.txId}
