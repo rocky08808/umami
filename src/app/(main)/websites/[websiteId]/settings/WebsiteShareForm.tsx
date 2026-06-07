@@ -1,7 +1,7 @@
 import { Column, Heading, Row, Text } from '@umami/react-zen';
 import { Plus } from 'lucide-react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
-import { useMessages, useWebsiteSharesQuery } from '@/components/hooks';
+import { useMessages, useWebsiteQuery, useWebsiteSharesQuery } from '@/components/hooks';
 import { DialogButton } from '@/components/input/DialogButton';
 import { ShareEditForm } from './ShareEditForm';
 import { SharesTable } from './SharesTable';
@@ -12,7 +12,9 @@ export interface WebsiteShareFormProps {
 
 export function WebsiteShareForm({ websiteId }: WebsiteShareFormProps) {
   const { t, labels, messages } = useMessages();
+  const { data: website } = useWebsiteQuery(websiteId);
   const { data, error, isLoading } = useWebsiteSharesQuery({ websiteId });
+  const target = website?.name || website?.domain || '';
 
   const shares = data?.data || [];
   const hasShares = shares.length > 0;
@@ -34,7 +36,7 @@ export function WebsiteShareForm({ websiteId }: WebsiteShareFormProps) {
         </Row>
         {hasShares ? (
           <>
-            <Text>{t(messages.shareUrl)}</Text>
+            <Text>{t(messages.shareUrl, { target })}</Text>
 
             <SharesTable data={shares} />
           </>

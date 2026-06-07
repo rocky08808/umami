@@ -2,7 +2,7 @@ import { Button, Column, Heading, Row, Text } from '@umami/react-zen';
 import { useState } from 'react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { IconLabel } from '@/components/common/IconLabel';
-import { useMessages, usePixelSharesQuery } from '@/components/hooks';
+import { useMessages, usePixelQuery, usePixelSharesQuery } from '@/components/hooks';
 import { Plus } from '@/components/icons';
 import { SimpleShareCreateForm } from '@/components/share/SimpleShareCreateForm';
 import { SimpleSharesTable } from '@/components/share/SimpleSharesTable';
@@ -50,7 +50,7 @@ function PixelShareFormContent({
         />
       )}
       {hasShares && (
-        <Text>{t(messages.shareUrl)}</Text>
+        <Text>{t(messages.shareUrl, { target: 'pixel' })}</Text>
       )}
       {!showCreateForm &&
         (hasShares ? (

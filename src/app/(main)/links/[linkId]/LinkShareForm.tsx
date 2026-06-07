@@ -2,7 +2,7 @@ import { Button, Column, Heading, Row, Text } from '@umami/react-zen';
 import { useState } from 'react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { IconLabel } from '@/components/common/IconLabel';
-import { useLinkSharesQuery, useMessages } from '@/components/hooks';
+import { useLinkQuery, useLinkSharesQuery, useMessages } from '@/components/hooks';
 import { Plus } from '@/components/icons';
 import { SimpleShareCreateForm } from '@/components/share/SimpleShareCreateForm';
 import { SimpleSharesTable } from '@/components/share/SimpleSharesTable';
@@ -29,7 +29,9 @@ function LinkShareFormContent({
   shares: any[];
 }) {
   const { t, labels, messages } = useMessages();
+  const { data: link } = useLinkQuery(linkId);
   const [isCreating, setIsCreating] = useState(false);
+  const target = link?.name || link?.url || '';
   const showCreateForm = isCreating;
 
   return (
@@ -50,7 +52,7 @@ function LinkShareFormContent({
         />
       )}
       {hasShares && (
-        <Text>{t(messages.shareUrl)}</Text>
+        <Text>{t(messages.shareUrl, { target })}</Text>
       )}
       {!showCreateForm &&
         (hasShares ? (

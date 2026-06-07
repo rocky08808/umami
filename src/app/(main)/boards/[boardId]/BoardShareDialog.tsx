@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Plus } from '@/components/icons';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { IconLabel } from '@/components/common/IconLabel';
-import { useBoardSharesQuery, useMessages } from '@/components/hooks';
+import { useBoardQuery, useBoardSharesQuery, useMessages } from '@/components/hooks';
 import { BoardShareCreateForm } from './BoardShareCreateForm';
 import { BoardSharesTable } from './BoardSharesTable';
 
@@ -29,7 +29,9 @@ function BoardShareDialogContent({
   shares: any[];
 }) {
   const { t, labels, messages } = useMessages();
+  const { data: board } = useBoardQuery(boardId);
   const [isCreating, setIsCreating] = useState(false);
+  const target = board?.name || '';
   const showCreateForm = isCreating;
 
   return (
@@ -50,7 +52,7 @@ function BoardShareDialogContent({
         />
       )}
       {hasShares && (
-        <Text>{t(messages.shareUrl)}</Text>
+        <Text>{t(messages.shareUrl, { target })}</Text>
       )}
       {!showCreateForm &&
         (hasShares ? (
