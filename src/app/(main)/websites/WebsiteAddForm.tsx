@@ -1,5 +1,7 @@
 import { Button, Form, FormField, FormSubmitButton, Row, TextField } from '@umami/react-zen';
-import { useMessages, useUpdateQuery } from '@/components/hooks';
+import { useTranslations } from 'next-intl';
+import { BillingLimitNotice } from '@/components/common/BillingLimitNotice';
+import { useMessages, useUpdateQuery, useWebsiteLimitStatus } from '@/components/hooks';
 import { DOMAIN_REGEX } from '@/lib/constants';
 
 export function WebsiteAddForm({
@@ -11,7 +13,9 @@ export function WebsiteAddForm({
   onSave?: () => void;
   onClose?: () => void;
 }) {
-  const { t, labels, messages } = useMessages();
+  const t = useTranslations();
+  const { t: tm, labels, messages } = useMessages();
+  const { limited, limit } = useWebsiteLimitStatus(teamId);
   const { mutateAsync, error, isPending } = useUpdateQuery('/websites', { teamId });
 
   const handleSubmit = async (data: any) => {
@@ -25,34 +29,38 @@ export function WebsiteAddForm({
 
   return (
     <Form onSubmit={handleSubmit} error={error?.message}>
+      {limited && limit !== null && (
+        <BillingLimitNotice message={t('billing.website-limit-reached', { limit })} />
+      )}
+
       <FormField
-        label={t(labels.name)}
+        label={tm(labels.name)}
         data-test="input-name"
         name="name"
-        rules={{ required: t(labels.required) }}
+        rules={{ required: tm(labels.required) }}
       >
-        <TextField autoComplete="off" />
+        <TextField autoComplete="off" isDisabled={limited} />
       </FormField>
 
       <FormField
-        label={t(labels.domain)}
+        label={tm(labels.domain)}
         data-test="input-domain"
         name="domain"
         rules={{
-          required: t(labels.required),
-          pattern: { value: DOMAIN_REGEX, message: t(messages.invalidDomain) },
+          required: tm(labels.required),
+          pattern: { value: DOMAIN_REGEX, message: tm(messages.invalidDomain) },
         }}
       >
-        <TextField autoComplete="off" />
+        <TextField autoComplete="off" isDisabled={limited} />
       </FormField>
       <Row justifyContent="flex-end" paddingTop="3" gap="3">
         {onClose && (
           <Button isDisabled={isPending} onPress={onClose}>
-            {t(labels.cancel)}
+            {tm(labels.cancel)}
           </Button>
         )}
-        <FormSubmitButton data-test="button-submit" isDisabled={false}>
-          {t(labels.save)}
+        <FormSubmitButton data-test="button-submit" isDisabled={limited || isPending}>
+          {tm(labels.save)}
         </FormSubmitButton>
       </Row>
     </Form>

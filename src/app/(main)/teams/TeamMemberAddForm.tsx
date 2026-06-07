@@ -7,7 +7,9 @@ import {
   ListItem,
   Select,
 } from '@umami/react-zen';
-import { useMessages, useUpdateQuery } from '@/components/hooks';
+import { useTranslations } from 'next-intl';
+import { BillingLimitNotice } from '@/components/common/BillingLimitNotice';
+import { useMessages, useTeamMemberLimitStatus, useUpdateQuery } from '@/components/hooks';
 import { UserSelect } from '@/components/input/UserSelect';
 import { ROLES } from '@/lib/constants';
 
@@ -22,7 +24,9 @@ export function TeamMemberAddForm({
   onSave?: () => void;
   onClose?: () => void;
 }) {
-  const { t, labels, getErrorMessage } = useMessages();
+  const t = useTranslations();
+  const { t: tm, labels, getErrorMessage } = useMessages();
+  const { limited, limit } = useTeamMemberLimitStatus(teamId);
   const { mutateAsync, error, isPending } = useUpdateQuery(`/teams/${teamId}/users`);
 
   const handleSubmit = async (data: any) => {
@@ -37,21 +41,25 @@ export function TeamMemberAddForm({
   const renderRole = role => {
     switch (role) {
       case ROLES.teamManager:
-        return t(labels.manager);
+        return tm(labels.manager);
       case ROLES.teamMember:
-        return t(labels.member);
+        return tm(labels.member);
       case ROLES.teamViewOnly:
-        return t(labels.viewOnly);
+        return tm(labels.viewOnly);
     }
   };
 
   return (
     <Form onSubmit={handleSubmit} error={getErrorMessage(error)}>
-      <FormField name="userId" label={t(labels.username)} rules={{ required: 'Required' }}>
+      {limited && limit !== null && (
+        <BillingLimitNotice message={t('billing.team-member-limit-reached', { limit })} />
+      )}
+
+      <FormField name="userId" label={tm(labels.username)} rules={{ required: 'Required' }}>
         <UserSelect teamId={teamId} />
       </FormField>
-      <FormField name="role" label={t(labels.role)} rules={{ required: 'Required' }}>
-        <Select renderValue={value => renderRole(value as any)}>
+      <FormField name="role" label={tm(labels.role)} rules={{ required: 'Required' }}>
+        <Select renderValue={value => renderRole(value as any)} isDisabled={limited}>
           {roles.map(value => (
             <ListItem key={value} id={value}>
               {renderRole(value)}
@@ -61,10 +69,10 @@ export function TeamMemberAddForm({
       </FormField>
       <FormButtons>
         <Button isDisabled={isPending} onPress={onClose}>
-          {t(labels.cancel)}
+          {tm(labels.cancel)}
         </Button>
-        <FormSubmitButton variant="primary" isDisabled={isPending}>
-          {t(labels.save)}
+        <FormSubmitButton variant="primary" isDisabled={limited || isPending}>
+          {tm(labels.save)}
         </FormSubmitButton>
       </FormButtons>
     </Form>

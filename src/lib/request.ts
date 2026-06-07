@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { checkAuth } from '@/lib/auth';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS } from '@/lib/constants';
 import { getAllowedUnits, getMinimumUnit, maxDate, parseDateRange } from '@/lib/date';
+import { getUserPlanLimits, getWebsiteOwnerId, isSelfHostedBilling } from '@/lib/billing-limits';
 import { fetchAccount, fetchWebsite } from '@/lib/load';
 import { filtersArrayToObject } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
@@ -93,11 +94,23 @@ export async function setWebsiteDate(websiteId: string, data: Record<string, any
   const website = await fetchWebsite(websiteId);
   const cloudMode = !!process.env.CLOUD_MODE;
 
-  if (cloudMode && website && !website.teamId) {
-    const account = await fetchAccount(website.userId);
+  if (website) {
+    if (cloudMode && !website.teamId) {
+      const account = await fetchAccount(website.userId);
 
-    if (!account?.hasSubscription) {
-      data.startDate = maxDate(data.startDate, startOfMonth(subMonths(new Date(), 6)));
+      if (!account?.hasSubscription) {
+        data.startDate = maxDate(data.startDate, startOfMonth(subMonths(new Date(), 6)));
+      }
+    } else if (isSelfHostedBilling()) {
+      const ownerId = await getWebsiteOwnerId(website);
+
+      if (ownerId) {
+        const { limits } = await getUserPlanLimits(ownerId);
+        data.startDate = maxDate(
+          data.startDate,
+          startOfMonth(subMonths(new Date(), limits.retentionMonths)),
+        );
+      }
     }
   }
 

@@ -75,6 +75,7 @@ export * from './queries/useWeeklyTrafficQuery';
 
 // Regular hooks
 export * from './useApi';
+export * from './useBillingLimits';
 export * from './useConfig';
 export * from './useCountryNames';
 export * from './useDateParameters';

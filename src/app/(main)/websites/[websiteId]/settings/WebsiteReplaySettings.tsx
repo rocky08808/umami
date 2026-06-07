@@ -10,9 +10,10 @@ import {
   Text,
   TextField,
 } from '@umami/react-zen';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { EmptyPlaceholder } from '@/components/common/EmptyPlaceholder';
-import { useMessages, useSubscription, useUpdateQuery, useWebsite } from '@/components/hooks';
+import { useMessages, useNavigation, useSubscription, useUpdateQuery, useWebsite } from '@/components/hooks';
 import { Video } from '@/components/icons';
 
 const RECORDER_NAME = 'recorder.js';
@@ -27,6 +28,8 @@ interface ReplayConfig {
 export function WebsiteReplaySettings({ websiteId }: { websiteId: string }) {
   const website = useWebsite();
   const { t, labels, messages } = useMessages();
+  const router = useRouter();
+  const { renderUrl } = useNavigation();
   const { hasFeature, cloudMode } = useSubscription(website?.teamId);
   const { mutateAsync, touch, toast, isPending } = useUpdateQuery(`/websites/${websiteId}`);
   const [enabled, setEnabled] = useState(website?.replayEnabled ?? false);
@@ -89,7 +92,7 @@ export function WebsiteReplaySettings({ websiteId }: { websiteId: string }) {
     );
   };
 
-  if (cloudMode && !hasFeature('replays')) {
+  if (!hasFeature('replays')) {
     return (
       <Column gap="4">
         <Label>{t(labels.replays)}</Label>
@@ -100,7 +103,14 @@ export function WebsiteReplaySettings({ websiteId }: { websiteId: string }) {
         >
           <Button
             variant="primary"
-            onPress={() => window.open(`${process.env.cloudUrl}/settings/billing`, '_blank')}
+            onPress={() => {
+              if (cloudMode) {
+                window.open(`${process.env.cloudUrl}/settings/billing`, '_blank');
+                return;
+              }
+
+              router.push(renderUrl('/settings/billing'));
+            }}
           >
             {t(labels.upgrade)}
           </Button>

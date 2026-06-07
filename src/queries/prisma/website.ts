@@ -265,6 +265,15 @@ export async function getWebsiteCount(userId: string) {
   });
 }
 
+export async function getTeamWebsiteCount(teamId: string) {
+  return prisma.client.website.count({
+    where: {
+      teamId,
+      deletedAt: null,
+    },
+  });
+}
+
 export async function attachShareIdToWebsite(website: Website) {
   const share = await prisma.client.share.findFirst({
     where: {

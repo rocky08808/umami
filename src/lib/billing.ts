@@ -1,5 +1,47 @@
 export type PlanId = 'hobby' | 'pro' | 'business' | 'enterprise';
 
+export interface PlanLimits {
+  websites: number | null;
+  teamMembers: number | null;
+  retentionMonths: number;
+  replays: boolean;
+}
+
+export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
+  hobby: {
+    websites: 3,
+    teamMembers: 3,
+    retentionMonths: 6,
+    replays: false,
+  },
+  pro: {
+    websites: 20,
+    teamMembers: 10,
+    retentionMonths: 24,
+    replays: false,
+  },
+  business: {
+    websites: null,
+    teamMembers: null,
+    retentionMonths: 60,
+    replays: true,
+  },
+  enterprise: {
+    websites: null,
+    teamMembers: null,
+    retentionMonths: 60,
+    replays: true,
+  },
+};
+
+export function getPlanLimits(planId: PlanId): PlanLimits {
+  return PLAN_LIMITS[planId];
+}
+
+export function isWithinLimit(count: number, limit: number | null) {
+  return limit === null || count < limit;
+}
+
 export interface PlanConfig {
   id: PlanId;
   nameKey: string;

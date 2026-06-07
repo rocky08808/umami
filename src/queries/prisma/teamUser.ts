@@ -64,3 +64,14 @@ export async function deleteTeamUser(teamId: string, userId: string) {
     },
   });
 }
+
+export async function getTeamMemberCount(teamId: string) {
+  return prisma.client.teamUser.count({
+    where: {
+      teamId,
+      user: {
+        deletedAt: null,
+      },
+    },
+  });
+}

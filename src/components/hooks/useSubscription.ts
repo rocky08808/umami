@@ -34,7 +34,7 @@ export function useSubscription(teamId?: string | null) {
   const cloudMode = config?.cloudMode || false;
 
   function hasFeature(feature: FeatureName): boolean {
-    if (!cloudMode || subscription.isNoBilling) {
+    if (subscription.isNoBilling) {
       return true;
     }
 

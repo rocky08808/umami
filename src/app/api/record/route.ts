@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { secret } from '@/lib/crypto';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { parseToken } from '@/lib/jwt';
+import { getWebsiteOwnerSubscription, isSelfHostedBilling } from '@/lib/billing-limits';
 import { fetchAccount, fetchTeam } from '@/lib/load';
 import { parseRequest } from '@/lib/request';
 import { badRequest, forbidden, json, serverError } from '@/lib/response';
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
 
       if (!account?.isBusiness && !account?.isNoBilling) {
         return forbidden({ message: 'Business subscription required.' });
+      }
+    } else if (isSelfHostedBilling()) {
+      const subscription = await getWebsiteOwnerSubscription(website);
+
+      if (!subscription.isBusiness) {
+        return json({ ok: false, reason: 'subscription_required' });
       }
     }
 
