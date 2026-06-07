@@ -3,6 +3,7 @@ import { getUserSubscription } from '@/lib/subscription';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
 import { getAllUserTeams } from '@/queries/prisma';
+import { getTeamOwner } from '@/queries/prisma/team';
 
 export async function POST(request: Request) {
   const { auth, error } = await parseRequest(request);
@@ -48,5 +49,16 @@ export async function POST(request: Request) {
 
   user.subscription = await getUserSubscription(user.id);
 
-  return json({ ...user, teams });
+  const teamsWithSubscription = await Promise.all(
+    teams.map(async (team: any) => {
+      const owner = await getTeamOwner(team.id);
+
+      return {
+        ...team,
+        subscription: owner ? await getUserSubscription(owner.userId) : null,
+      };
+    }),
+  );
+
+  return json({ ...user, teams: teamsWithSubscription });
 }
