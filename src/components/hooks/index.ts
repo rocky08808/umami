@@ -13,6 +13,8 @@ export * from './context/useWebsite';
 export * from './useAdminNavItems';
 export * from './queries/useAdminStatsQuery';
 export * from './queries/useAdminRechargeOrdersQuery';
+export * from './queries/useAdminUserWalletQuery';
+export * from './queries/useAdminUserRechargeOrdersQuery';
 export * from './queries/useBillingUsageQuery';
 export * from './queries/useRechargeOrdersQuery';
 export * from './queries/useWalletQuery';

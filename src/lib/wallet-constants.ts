@@ -6,4 +6,5 @@ export const WALLET_TRANSACTION_TYPE = {
 export const WALLET_REFERENCE_TYPE = {
   rechargeOrder: 'recharge_order',
   subscription: 'subscription',
+  adminCredit: 'admin_credit',
 } as const;

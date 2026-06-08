@@ -30,6 +30,12 @@ export async function GET(request: Request) {
             expiresAt: true,
           },
         },
+        userWallet: {
+          select: {
+            balance: true,
+            currency: true,
+          },
+        },
         _count: {
           select: {
             websites: {

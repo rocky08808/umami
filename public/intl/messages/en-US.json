@@ -692,6 +692,22 @@
     "subscriptions-debit-pro": "Pro debits",
     "subscriptions-debit-business": "Business debits",
     "subscriptions-debit-count": "{count, plural, one {# debit} other {# debits}}",
-    "subscriptions-debit-chart": "Debit trends"
+    "subscriptions-debit-chart": "Debit trends",
+    "wallet-credit": "Manual credit",
+    "wallet-credit-desc": "Manually add balance to a user account. The action is recorded in wallet transactions.",
+    "wallet-credit-user": "Select user",
+    "wallet-credit-amount": "Credit amount",
+    "wallet-credit-amount-placeholder": "Enter whole number amount",
+    "wallet-credit-amount-range": "Supported range: {min} - {max} USDT, integers only",
+    "wallet-credit-note": "Note (optional)",
+    "wallet-credit-note-placeholder": "e.g. compensation, promotion",
+    "wallet-credit-submit": "Add balance",
+    "wallet-credit-success": "Added {amount} USDT to {username}. New balance: {balance} USDT",
+    "wallet-credit-current-balance": "Current balance: {balance} {currency}",
+    "wallet-credit-loading-balance": "Loading balance…",
+    "user-recharge-history": "Recharge history",
+    "user-recharge-orders": "Recharge orders",
+    "user-recharge-orders-empty": "No recharge orders yet.",
+    "user-wallet-credits": "Credit transactions"
   }
 }

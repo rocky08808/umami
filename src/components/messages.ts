@@ -388,6 +388,7 @@ export const labels: Record<string, string> = {
   recharge: 'recharge.title',
   integration: 'integration.title',
   rechargeReview: 'recharge.admin-title',
+  walletCredit: 'admin.wallet-credit',
   administration: 'label.administration',
 };
 

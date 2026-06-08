@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Globe, PanelsLeftBottom, User, Users, Wallet } from '@/components/icons';
+import { CircleDollarSign, Globe, PanelsLeftBottom, User, Users, Wallet } from '@/components/icons';
 import { canAccessAdminNavItem } from '@/lib/admin-nav';
 import { useConfig } from './useConfig';
 import { useLoginQuery } from './queries/useLoginQuery';
@@ -52,6 +52,13 @@ export function useAdminNavItems(): AdminNavItem[] {
       label: t(labels.rechargeReview),
       path: '/admin/recharge',
       icon: <Wallet />,
+    },
+    {
+      id: 'wallet',
+      permission: 'wallet',
+      label: t(labels.walletCredit),
+      path: '/admin/wallet',
+      icon: <CircleDollarSign />,
     },
   ];
 

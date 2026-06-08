@@ -1,7 +1,7 @@
 import type { Config } from '@/components/hooks/useConfig';
 import { ROLES } from '@/lib/constants';
 
-export type AdminNavItemId = 'overview' | 'users' | 'websites' | 'teams' | 'recharge';
+export type AdminNavItemId = 'overview' | 'users' | 'websites' | 'teams' | 'recharge' | 'wallet';
 
 export type AdminNavUser = {
   isAdmin: boolean;
@@ -25,6 +25,8 @@ export function canAccessAdminNavItem(
       return true;
     case 'recharge':
       return !!config?.usdtWalletAddress;
+    case 'wallet':
+      return true;
     default:
       return false;
   }

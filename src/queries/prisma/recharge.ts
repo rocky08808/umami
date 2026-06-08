@@ -101,13 +101,18 @@ export async function countUserPendingRechargeOrders(userId: string) {
 
 export async function getRechargeOrders(filters: {
   status?: string;
+  userId?: string;
   page?: number;
   pageSize?: number;
   search?: string;
 }) {
-  const { status, page = 1, pageSize = 20, search } = filters;
+  const { status, userId, page = 1, pageSize = 20, search } = filters;
 
   const where: any = {};
+
+  if (userId) {
+    where.userId = userId;
+  }
 
   if (status) {
     where.status = status;

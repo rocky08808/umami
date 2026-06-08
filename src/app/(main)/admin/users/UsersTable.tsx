@@ -8,6 +8,7 @@ import { useMessages } from '@/components/hooks';
 import { Edit, Trash } from '@/components/icons';
 import { MenuButton } from '@/components/input/MenuButton';
 import { ROLES } from '@/lib/constants';
+import { formatAmountDisplay } from '@/lib/recharge';
 import { UserDeleteForm } from './UserDeleteForm';
 
 export function UsersTable({
@@ -20,6 +21,7 @@ export function UsersTable({
 }) {
   const { t, labels } = useMessages();
   const tb = useTranslations('billing');
+  const tBalance = useTranslations('balance');
   const [deleteUser, setDeleteUser] = useState(null);
 
   return (
@@ -35,6 +37,14 @@ export function UsersTable({
         </DataColumn>
         <DataColumn id="plan" label={tb('current-plan')} width="1.2fr">
           {(row: any) => <UserPlanDisplay subscription={row.userSubscription} />}
+        </DataColumn>
+        <DataColumn id="balance" label={tBalance('title')} width="1fr">
+          {(row: any) => {
+            const currency = row.userWallet?.currency || 'USDT';
+            const balance = formatAmountDisplay(row.userWallet?.balance ?? 0);
+
+            return `${balance} ${currency}`;
+          }}
         </DataColumn>
         <DataColumn id="websites" label={t(labels.websites)}>
           {(row: any) => row._count.websites}

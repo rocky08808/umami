@@ -680,6 +680,22 @@
     "subscriptions-debit-pro": "Pro 扣款",
     "subscriptions-debit-business": "Business 扣款",
     "subscriptions-debit-count": "共 {count} 笔",
-    "subscriptions-debit-chart": "扣款趋势"
+    "subscriptions-debit-chart": "扣款趋势",
+    "wallet-credit": "手动加余额",
+    "wallet-credit-desc": "为指定用户手动增加账户余额，操作会记入钱包流水。",
+    "wallet-credit-user": "选择用户",
+    "wallet-credit-amount": "增加金额",
+    "wallet-credit-amount-placeholder": "输入整数金额",
+    "wallet-credit-amount-range": "支持 {min} - {max} USDT，仅整数",
+    "wallet-credit-note": "备注（可选）",
+    "wallet-credit-note-placeholder": "例如：补偿、活动赠送",
+    "wallet-credit-submit": "确认加余额",
+    "wallet-credit-success": "已为 {username} 增加 {amount} USDT，当前余额 {balance} USDT",
+    "wallet-credit-current-balance": "当前余额：{balance} {currency}",
+    "wallet-credit-loading-balance": "正在加载余额…",
+    "user-recharge-history": "充值流水",
+    "user-recharge-orders": "充值订单",
+    "user-recharge-orders-empty": "暂无充值订单。",
+    "user-wallet-credits": "入账流水"
   }
 }
