@@ -1,17 +1,14 @@
 import {
-  RECHARGE_BALANCE_PLAN,
   RECHARGE_MAX_PENDING_ORDERS_PER_USER,
-  normalizeTxId,
   parseRechargeAmount,
   planToRechargeAmount,
 } from '@/lib/recharge';
+import { createAutoRechargeOrder } from '@/lib/recharge-auto';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json } from '@/lib/response';
 import { notifyRechargeOrderSubmitted } from '@/lib/telegram';
 import {
   countUserPendingRechargeOrders,
-  createRechargeOrder,
-  getRechargeOrderByTxId,
   getUserRechargeOrders,
 } from '@/queries/prisma/recharge';
 
@@ -41,27 +38,8 @@ export async function POST(request: Request) {
     return badRequest({ message: 'Invalid amount.', code: 'invalid-amount' });
   }
 
-  const txId = normalizeTxId(String(body?.txId || ''));
-
-  if (!txId) {
-    return badRequest({ message: 'Transaction ID is required.', code: 'tx-id-required' });
-  }
-
-  if (txId.length < 8) {
-    return badRequest({ message: 'Transaction ID is too short.', code: 'tx-id-invalid' });
-  }
-
-  if (txId.length > 255) {
-    return badRequest({ message: 'Transaction ID is too long.', code: 'tx-id-invalid' });
-  }
-
-  const existing = await getRechargeOrderByTxId(txId);
-
-  if (existing) {
-    return badRequest({
-      message: 'Transaction ID already submitted.',
-      code: 'tx-id-duplicate',
-    });
+  if (!process.env.USDT_WALLET_ADDRESS?.trim()) {
+    return badRequest({ message: 'Wallet address is not configured.', code: 'wallet-not-configured' });
   }
 
   const pendingOrderCount = await countUserPendingRechargeOrders(auth.user.id);
@@ -73,22 +51,19 @@ export async function POST(request: Request) {
     });
   }
 
-  const order = await createRechargeOrder({
+  const order = await createAutoRechargeOrder({
     userId: auth.user.id,
-    plan: RECHARGE_BALANCE_PLAN,
     amount,
-    currency: 'USDT',
     network: body?.network || process.env.USDT_NETWORK || 'TRC20',
-    txId,
-    periodDays: 0,
   });
 
   void notifyRechargeOrderSubmitted({
     orderNo: order.orderNo,
     plan: order.plan,
-    amount: order.amount,
+    amount: Number(order.payAmount ?? order.amount),
     currency: order.currency,
     username: order.user?.username,
+    auto: true,
   });
 
   return json(order);

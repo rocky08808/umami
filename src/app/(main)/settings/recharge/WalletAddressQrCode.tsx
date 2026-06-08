@@ -1,9 +1,10 @@
 'use client';
 import { Column, Text } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
+import { memo } from 'react';
 import QRCode from 'react-qr-code';
 
-export function WalletAddressQrCode({ address }: { address: string }) {
+export const WalletAddressQrCode = memo(function WalletAddressQrCode({ address }: { address: string }) {
   const t = useTranslations();
 
   if (!address) {
@@ -28,4 +29,4 @@ export function WalletAddressQrCode({ address }: { address: string }) {
       </Text>
     </Column>
   );
-}
+});

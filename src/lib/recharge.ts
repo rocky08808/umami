@@ -74,6 +74,28 @@ export function getSubscriptionPeriodDays(
 }
 
 export const RECHARGE_MAX_PENDING_ORDERS_PER_USER = 1;
+export const RECHARGE_AUTO_EXPIRE_MINUTES = 30;
+export const RECHARGE_AUTO_TX_PREFIX = 'auto:pending:';
+export const USDT_TRC20_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+export const USDT_TRC20_DECIMALS = 6;
+
+export function isAutoRechargeTxId(txId: string) {
+  return txId.startsWith(RECHARGE_AUTO_TX_PREFIX);
+}
+
+export function formatPayAmount(value: unknown) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) {
+    return '—';
+  }
+
+  return amount.toFixed(2);
+}
+
+export function roundPayAmount(value: number) {
+  return Math.round(value * 100) / 100;
+}
 
 export const RECHARGE_ORDER_STATUS = {
   pending: 'pending',

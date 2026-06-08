@@ -67,10 +67,12 @@ model RechargeOrder {
   userId     String    @map("user_id") @db.Uuid
   plan       String    @db.VarChar(50)
   amount     Decimal   @db.Decimal(10, 2)
+  payAmount  Decimal?  @map("pay_amount") @db.Decimal(10, 2)
   currency   String    @default("USDT") @db.VarChar(10)
   network    String    @default("TRC20") @db.VarChar(20)
   txId       String    @map("tx_id") @db.VarChar(255)
   status     String    @default("pending") @db.VarChar(50)
+  expiresAt  DateTime? @map("expires_at") @db.Timestamptz(6)
   adminNote  String?   @map("admin_note") @db.VarChar(500)
   reviewedBy String?   @map("reviewed_by") @db.Uuid
   reviewedAt DateTime? @map("reviewed_at") @db.Timestamptz(6)
@@ -84,6 +86,8 @@ model RechargeOrder {
   @@index([status])
   @@index([txId])
   @@index([createdAt])
+  @@index([payAmount])
+  @@index([expiresAt])
   @@map("recharge_order")
 }
 

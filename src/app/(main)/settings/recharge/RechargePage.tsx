@@ -11,7 +11,7 @@ import {
 } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
@@ -20,7 +20,6 @@ import {
   useApi,
   useConfig,
   useLoginQuery,
-  useModified,
   useNavigation,
   useRechargeOrdersQuery,
   useWalletQuery,
@@ -32,12 +31,15 @@ import {
   RECHARGE_MIN_AMOUNT,
   RECHARGE_ORDER_STATUS,
   formatAmountDisplay,
-  normalizeTxId,
+  isAutoRechargeTxId,
   parseRechargeAmount,
   planToRechargeAmount,
   sanitizeRechargeAmountInput,
 } from '@/lib/recharge';
+import { touch } from '@/components/hooks/useModified';
+import { RechargeOrderCountdown } from './RechargeOrderCountdown';
 import { RechargeOrdersList } from './RechargeOrdersList';
+import { RechargePayAmountHighlight } from './RechargePayAmountHighlight';
 import { WalletAddressQrCode } from './WalletAddressQrCode';
 
 export function RechargePage() {
@@ -48,11 +50,9 @@ export function RechargePage() {
   const { user } = useLoginQuery();
   const { post } = useApi();
   const { toast } = useToast();
-  const { touch } = useModified('recharge-orders');
-  const { data: orders = [] } = useRechargeOrdersQuery();
-  const { data: wallet } = useWalletQuery();
+  const { data: orders = [], refetch: refetchOrders } = useRechargeOrdersQuery();
+  const { data: wallet, refetch: refetchWallet } = useWalletQuery();
   const [amountInput, setAmountInput] = useState(String(RECHARGE_AMOUNT_OPTIONS[0].amount));
-  const [txId, setTxId] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -78,28 +78,78 @@ export function RechargePage() {
   ).length;
   const orderLimitReached = pendingOrderCount >= RECHARGE_MAX_PENDING_ORDERS_PER_USER;
 
-  const handleConfirmPayment = async () => {
-    const normalizedTxId = normalizeTxId(txId);
+  const activeOrder = useMemo(() => {
+    return orders.find((order: any) => {
+      return (
+        order.status === RECHARGE_ORDER_STATUS.pending
+        && isAutoRechargeTxId(order.txId)
+        && order.expiresAt
+        && new Date(order.expiresAt) > new Date()
+      );
+    });
+  }, [orders]);
 
-    if (!normalizedTxId) {
+  const activeOrderId = activeOrder?.id;
+  const approvedToastShown = useRef(false);
+
+  useEffect(() => {
+    approvedToastShown.current = false;
+  }, [activeOrderId]);
+
+  useEffect(() => {
+    if (!activeOrderId) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const syncOrder = async () => {
+      try {
+        await post('/recharge/monitor');
+        if (cancelled) {
+          return;
+        }
+
+        const { data: nextOrders } = await refetchOrders();
+        await refetchWallet();
+
+        const updated = nextOrders?.find((order: any) => order.id === activeOrderId);
+
+        if (
+          updated?.status === RECHARGE_ORDER_STATUS.approved
+          && !approvedToastShown.current
+        ) {
+          approvedToastShown.current = true;
+          toast(t('recharge.order-approved'));
+        }
+      } catch {
+        // Ignore polling errors.
+      }
+    };
+
+    const interval = window.setInterval(syncOrder, 30000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [activeOrderId, post, refetchOrders, refetchWallet, t, toast]);
+
+  const handleCreateOrder = async () => {
+    if (rechargeAmount == null) {
       return;
     }
 
     setSubmitting(true);
 
     try {
-      if (rechargeAmount == null) {
-        return;
-      }
-
       await post('/recharge/orders', {
         amount: rechargeAmount,
-        txId: normalizedTxId,
         network,
       });
-      toast(t('recharge.order-submitted'));
-      setTxId('');
+      toast(t('recharge.order-created'));
       touch('recharge-orders');
+      await refetchOrders();
     } catch (e: any) {
       toast(
         (e.code && t(`recharge.${e.code}`)) || e.message || t('recharge.order-error'),
@@ -109,12 +159,15 @@ export function RechargePage() {
     }
   };
 
+  const payAmount = activeOrder?.payAmount ?? activeOrder?.amount;
+  const expiresAt = activeOrder?.expiresAt ? new Date(activeOrder.expiresAt) : null;
+
   return (
     <PageBody>
       <Column gap="6">
         <PageHeader
           title={t('recharge.title')}
-          description={t('recharge.description')}
+          description={t('recharge.description-auto')}
           showBorder={false}
         />
 
@@ -133,11 +186,12 @@ export function RechargePage() {
           <Panel title={t('recharge.select-amount')}>
             <Column gap="4">
               <Column gap="1">
-                <Label>{t('recharge.amount')}</Label>
+                <Label>{t('recharge.credit-amount')}</Label>
                 <TextField
                   value={amountInput}
                   onChange={value => setAmountInput(sanitizeRechargeAmountInput(value))}
                   placeholder={t('recharge.amount-placeholder')}
+                  isDisabled={!!activeOrder}
                 />
                 <Text color="muted" size="sm">
                   {t('recharge.amount-range', {
@@ -165,6 +219,7 @@ export function RechargePage() {
                         key={item.amount}
                         variant={isSelected ? 'primary' : 'outline'}
                         onPress={() => setAmountInput(String(item.amount))}
+                        isDisabled={!!activeOrder}
                       >
                         {item.amount} USDT
                       </Button>
@@ -172,76 +227,108 @@ export function RechargePage() {
                   })}
                 </Row>
               </Column>
+
+              {!activeOrder && (
+                <Button
+                  variant="primary"
+                  onPress={handleCreateOrder}
+                  isDisabled={
+                    !walletAddress
+                    || submitting
+                    || orderLimitReached
+                    || rechargeAmount == null
+                  }
+                >
+                  {t('recharge.create-order')}
+                </Button>
+              )}
+
+              {orderLimitReached && !activeOrder && (
+                <Text color="red" size="sm">
+                  {t('recharge.order-limit-reached', { limit: RECHARGE_MAX_PENDING_ORDERS_PER_USER })}
+                </Text>
+              )}
             </Column>
           </Panel>
 
           <Panel title={t('recharge.payment-info')}>
             <Column gap="4">
-              <Column gap="1">
-                <Label>{t('recharge.amount')}</Label>
-                <Text size="2xl" weight="bold">
-                  {rechargeAmount != null ? `${formatAmountDisplay(rechargeAmount)} USDT` : '—'}
-                </Text>
-              </Column>
+              {activeOrder ? (
+                <>
+                  <RechargePayAmountHighlight
+                    creditAmount={activeOrder.amount}
+                    payAmount={payAmount}
+                  />
 
-              <Column gap="1">
-                <Label>{t('recharge.network')}</Label>
-                <Text weight="bold">{network}</Text>
-              </Column>
+                  {expiresAt && (
+                    <RechargeOrderCountdown
+                      expiresAt={expiresAt}
+                      onExpire={() => {
+                        void refetchOrders();
+                      }}
+                    />
+                  )}
 
-              <Column gap="2">
-                <Label>{t('recharge.wallet-address')}</Label>
-                {walletAddress ? (
-                  <Column gap="3">
-                    <WalletAddressQrCode address={walletAddress} />
-                    <TextField value={walletAddress} isReadOnly allowCopy />
+                  <Column gap="1">
+                    <Label>{t('recharge.order-no')}</Label>
+                    <Text weight="bold">{activeOrder.orderNo}</Text>
                   </Column>
-                ) : (
-                  <Text color="muted">{t('recharge.wallet-not-configured')}</Text>
-                )}
-              </Column>
 
-              {user?.username && (
-                <Column gap="1">
-                  <Label>{t('recharge.account')}</Label>
-                  <TextField value={user.username} isReadOnly allowCopy />
-                </Column>
+                  <Column gap="1">
+                    <Label>{t('recharge.credit-amount')}</Label>
+                    <Text size="lg" color="muted">
+                      {formatAmountDisplay(activeOrder.amount)} USDT
+                    </Text>
+                  </Column>
+
+                  <Column gap="1">
+                    <Label>{t('recharge.network')}</Label>
+                    <Text weight="bold">{network}</Text>
+                  </Column>
+
+                  <Column gap="2">
+                    <Label>{t('recharge.wallet-address')}</Label>
+                    {walletAddress ? (
+                      <Column gap="3">
+                        <WalletAddressQrCode address={walletAddress} />
+                        <TextField value={walletAddress} isReadOnly allowCopy />
+                      </Column>
+                    ) : (
+                      <Text color="muted">{t('recharge.wallet-not-configured')}</Text>
+                    )}
+                  </Column>
+
+                  <Text weight="bold">{t('recharge.auto-waiting')}</Text>
+                </>
+              ) : (
+                <>
+                  <Column gap="1">
+                    <Label>{t('recharge.credit-amount')}</Label>
+                    <Text size="2xl" weight="bold">
+                      {rechargeAmount != null ? `${formatAmountDisplay(rechargeAmount)} USDT` : '—'}
+                    </Text>
+                  </Column>
+
+                  <Column gap="1">
+                    <Label>{t('recharge.network')}</Label>
+                    <Text weight="bold">{network}</Text>
+                  </Column>
+
+                  <Column gap="2">
+                    <Label>{t('recharge.wallet-address')}</Label>
+                    {walletAddress ? (
+                      <Column gap="3">
+                        <WalletAddressQrCode address={walletAddress} />
+                        <TextField value={walletAddress} isReadOnly allowCopy />
+                      </Column>
+                    ) : (
+                      <Text color="muted">{t('recharge.wallet-not-configured')}</Text>
+                    )}
+                  </Column>
+
+                  <Text color="muted">{t('recharge.auto-steps')}</Text>
+                </>
               )}
-
-              <Column gap="2">
-                <Text color="muted">{t('recharge.step-1')}</Text>
-                <Text color="muted">{t('recharge.step-2')}</Text>
-                <Text color="muted">{t('recharge.step-3')}</Text>
-              </Column>
-
-              <Column gap="1">
-                <Label>{t('recharge.tx-id')}</Label>
-                <TextField
-                  value={txId}
-                  onChange={setTxId}
-                  placeholder={t('recharge.tx-id-placeholder')}
-                />
-              </Column>
-
-              {orderLimitReached && (
-                <Text color="red" size="sm">
-                  {t('recharge.order-limit-reached', { limit: RECHARGE_MAX_PENDING_ORDERS_PER_USER })}
-                </Text>
-              )}
-
-              <Button
-                variant="primary"
-                onPress={handleConfirmPayment}
-                isDisabled={
-                  !walletAddress
-                  || !txId.trim()
-                  || submitting
-                  || orderLimitReached
-                  || rechargeAmount == null
-                }
-              >
-                {t('recharge.submit-payment')}
-              </Button>
             </Column>
           </Panel>
         </Grid>

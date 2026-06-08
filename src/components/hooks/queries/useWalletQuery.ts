@@ -1,3 +1,4 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import { useApi } from '../useApi';
 import { useModified } from '../useModified';
 
@@ -8,5 +9,6 @@ export function useWalletQuery() {
   return useApi().useQuery({
     queryKey: ['wallet', { modified }],
     queryFn: () => get('/wallet'),
+    placeholderData: keepPreviousData,
   });
 }

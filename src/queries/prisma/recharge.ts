@@ -33,25 +33,30 @@ export async function upsertUserSubscription(
 }
 
 export async function createRechargeOrder(data: {
+  id?: string;
   userId: string;
   plan: string;
   amount: number;
+  payAmount?: number;
   currency: string;
   network: string;
   txId: string;
   periodDays: number;
+  expiresAt?: Date;
 }) {
   return prisma.client.rechargeOrder.create({
     data: {
-      id: uuid(),
+      id: data.id || uuid(),
       orderNo: createRechargeOrderNo(),
       userId: data.userId,
       plan: data.plan,
       amount: data.amount,
+      payAmount: data.payAmount ?? data.amount,
       currency: data.currency,
       network: data.network,
       txId: data.txId,
       periodDays: data.periodDays,
+      expiresAt: data.expiresAt,
     },
     include: {
       user: {
@@ -141,6 +146,7 @@ export async function updateRechargeOrder(
     adminNote?: string;
     reviewedBy?: string;
     reviewedAt?: Date;
+    txId?: string;
   },
 ) {
   return prisma.client.rechargeOrder.update({

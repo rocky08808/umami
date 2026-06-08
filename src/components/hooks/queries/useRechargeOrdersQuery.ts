@@ -1,3 +1,4 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import { useApi } from '../useApi';
 import { useModified } from '../useModified';
 
@@ -8,5 +9,6 @@ export function useRechargeOrdersQuery() {
   return useApi().useQuery({
     queryKey: ['recharge:orders', { modified }],
     queryFn: () => get('/recharge/orders'),
+    placeholderData: keepPreviousData,
   });
 }

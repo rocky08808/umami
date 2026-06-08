@@ -4,14 +4,19 @@ import { useTranslations } from 'next-intl';
 import { DateDistance } from '@/components/common/DateDistance';
 import { Panel } from '@/components/common/Panel';
 import { useRechargeOrdersQuery } from '@/components/hooks';
-import { formatAmountDisplay, getRechargeOrderLabelKey } from '@/lib/recharge';
+import {
+  formatAmountDisplay,
+  formatPayAmount,
+  getRechargeOrderLabelKey,
+  isAutoRechargeTxId,
+} from '@/lib/recharge';
 import { RechargeOrderStatusBadge } from './RechargeOrderStatusBadge';
 
 export function RechargeOrdersList() {
   const t = useTranslations();
   const { data: orders = [], isLoading } = useRechargeOrdersQuery();
 
-  if (isLoading || !orders.length) {
+  if ((isLoading && !orders.length) || !orders.length) {
     return null;
   }
 
@@ -30,9 +35,14 @@ export function RechargeOrdersList() {
               <Text weight="bold">{order.orderNo}</Text>
               <Text color="muted" size="sm">
                 {t(getRechargeOrderLabelKey(order.plan))} · {formatAmountDisplay(order.amount)} {order.currency}
+                {order.payAmount != null && Number(order.payAmount) !== Number(order.amount)
+                  ? ` · ${t('recharge.pay-amount-short', { amount: formatPayAmount(order.payAmount) })}`
+                  : ''}
               </Text>
               <Text color="muted" size="sm" truncate title={order.txId}>
-                {order.txId}
+                {isAutoRechargeTxId(order.txId) && order.status === 'pending'
+                  ? t('recharge.auto-waiting')
+                  : order.txId}
               </Text>
               {order.adminNote && (
                 <Text color="muted" size="sm">

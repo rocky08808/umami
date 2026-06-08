@@ -387,7 +387,11 @@ function getClient() {
 
   if (!replicaUrl) {
     log('Prisma initialized');
-    globalThis[PRISMA] ??= baseClient;
+
+    if (process.env.NODE_ENV === 'production') {
+      globalThis[PRISMA] ??= baseClient;
+    }
+
     return baseClient;
   }
 
@@ -410,12 +414,19 @@ function getClient() {
   );
 
   log('Prisma initialized (with replica)');
-  globalThis[PRISMA] ??= extended;
+
+  if (process.env.NODE_ENV === 'production') {
+    globalThis[PRISMA] ??= extended;
+  }
 
   return extended;
 }
 
-const client = (globalThis[PRISMA] || getClient()) as ReturnType<typeof getClient>;
+const client = (
+  process.env.NODE_ENV === 'production' && globalThis[PRISMA]
+    ? globalThis[PRISMA]
+    : getClient()
+) as ReturnType<typeof getClient>;
 
 export default {
   client,

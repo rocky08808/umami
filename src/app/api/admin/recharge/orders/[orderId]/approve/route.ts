@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { RECHARGE_ORDER_STATUS } from '@/lib/recharge';
-import { creditWallet, WALLET_REFERENCE_TYPE } from '@/lib/wallet';
+import { approveRechargeOrder } from '@/lib/recharge-approve';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, notFound, unauthorized } from '@/lib/response';
-import { getRechargeOrder, updateRechargeOrder } from '@/queries/prisma/recharge';
+import { getRechargeOrder } from '@/queries/prisma/recharge';
 import { canViewUsers } from '@/permissions';
 
 export async function POST(
@@ -35,17 +35,9 @@ export async function POST(
     return badRequest({ message: 'Only pending orders can be approved.' });
   }
 
-  await creditWallet(order.userId, order.amount, {
-    description: `Recharge order ${order.orderNo}`,
-    referenceType: WALLET_REFERENCE_TYPE.rechargeOrder,
-    referenceId: order.id,
-  });
-
-  const updated = await updateRechargeOrder(orderId, {
-    status: RECHARGE_ORDER_STATUS.approved,
+  const updated = await approveRechargeOrder(orderId, {
     adminNote: body.adminNote,
     reviewedBy: auth.user.id,
-    reviewedAt: new Date(),
   });
 
   return json(updated);
