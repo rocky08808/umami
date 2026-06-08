@@ -1,3 +1,4 @@
+import { getCustomerServiceConfig } from '@/lib/customer-service';
 import { isRegistrationEnabled } from '@/lib/register';
 import { parseRequest } from '@/lib/request';
 import { json } from '@/lib/response';
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
     currentVersion: !!process.env.currentVersion,
     usdtWalletAddress: process.env.USDT_WALLET_ADDRESS || '',
     usdtNetwork: process.env.USDT_NETWORK || 'TRC20',
+    customerService: getCustomerServiceConfig(),
     allowRegistration: isRegistrationEnabled(),
   });
 }

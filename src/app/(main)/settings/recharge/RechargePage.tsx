@@ -37,6 +37,7 @@ import {
   sanitizeRechargeAmountInput,
 } from '@/lib/recharge';
 import { touch } from '@/components/hooks/useModified';
+import { CustomerServiceNotice } from './CustomerServiceNotice';
 import { RechargeOrderCountdown } from './RechargeOrderCountdown';
 import { RechargeOrdersList } from './RechargeOrdersList';
 import { RechargePayAmountHighlight } from './RechargePayAmountHighlight';
@@ -332,6 +333,8 @@ export function RechargePage() {
             </Column>
           </Panel>
         </Grid>
+
+        <CustomerServiceNotice />
 
         <RechargeOrdersList />
       </Column>

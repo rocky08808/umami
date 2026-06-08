@@ -3,6 +3,7 @@ import { AlertBanner, Column, Row, Text } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
 import { CopyButton } from '@/components/common/CopyButton';
 import { formatAmountDisplay, formatPayAmount } from '@/lib/recharge';
+import { CustomerServiceNotice } from './CustomerServiceNotice';
 
 export function RechargePayAmountHighlight({
   creditAmount,
@@ -73,6 +74,7 @@ export function RechargePayAmountHighlight({
         <Text color="red" size="sm" weight="bold">
           {t('recharge.pay-amount-wrong-warning')}
         </Text>
+        <CustomerServiceNotice variant="compact" />
       </Column>
     </Column>
   );

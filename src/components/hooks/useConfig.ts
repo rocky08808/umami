@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useApi } from '@/components/hooks/useApi';
+import type { CustomerServiceConfig } from '@/lib/customer-service';
 import { setConfig, useApp } from '@/store/app';
 
 export type Config = {
@@ -13,6 +14,7 @@ export type Config = {
   updatesDisabled: boolean;
   usdtWalletAddress?: string;
   usdtNetwork?: string;
+  customerService?: CustomerServiceConfig | null;
   allowRegistration?: boolean;
 };
 
