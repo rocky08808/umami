@@ -393,7 +393,7 @@
     "user-already-exists": "用户名已被占用。",
     "registration-disabled": "当前未开放注册。",
     "invalid-domain": "无效域名",
-    "batch-websites-hint": "每行输入一个域名，将自动去除 http:// 和路径。",
+    "batch-websites-hint": "每行输入一个域名，将自动去除 http:// 和路径。单次最多添加 {max} 个。",
     "batch-websites-count": "将创建 {count} 个网站",
     "batch-websites-created": "已成功创建 {count} 个网站",
     "batch-websites-failed": "{count} 个网站创建失败",

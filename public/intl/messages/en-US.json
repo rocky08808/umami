@@ -403,7 +403,7 @@
     "user-already-exists": "Username is already taken.",
     "registration-disabled": "Registration is currently disabled.",
     "invalid-domain": "Invalid domain. Do not include http/https.",
-    "batch-websites-hint": "Enter one domain per line. http:// and paths are removed automatically.",
+    "batch-websites-hint": "Enter one domain per line. http:// and paths are removed automatically. Up to {max} per batch.",
     "batch-websites-count": "{count, plural, one {# website will be created} other {# websites will be created}}",
     "batch-websites-created": "{count, plural, one {# website created} other {# websites created}}",
     "batch-websites-failed": "{count, plural, one {# website failed to create} other {# websites failed to create}}",

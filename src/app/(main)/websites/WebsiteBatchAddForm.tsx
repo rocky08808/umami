@@ -249,7 +249,7 @@ export function WebsiteBatchAddForm({
 
       <Column gap="2">
         <Text color="muted" size="sm">
-          {t('message.batch-websites-hint')}
+          {t('message.batch-websites-hint', { max: MAX_BATCH_SIZE })}
         </Text>
         <TextField
           asTextArea
