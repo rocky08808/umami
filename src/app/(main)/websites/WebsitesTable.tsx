@@ -1,5 +1,6 @@
-import { DataColumn, DataTable, type DataTableProps, Icon } from '@umami/react-zen';
+import { DataColumn, DataTable, type DataTableProps, Icon, Text } from '@umami/react-zen';
 import type { ReactNode } from 'react';
+import { DateDistance } from '@/components/common/DateDistance';
 import { LinkButton } from '@/components/common/LinkButton';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { SquarePen } from '@/components/icons';
@@ -17,12 +18,28 @@ export function WebsitesTable({ showActions, renderLink, ...props }: WebsitesTab
 
   return (
     <DataTable {...props}>
-      <DataColumn id="name" label={t(labels.name)}>
+      <DataColumn id="name" label={t(labels.name)} width="2fr">
         {renderLink}
       </DataColumn>
-      <DataColumn id="domain" label={t(labels.domain)} />
+      <DataColumn id="domain" label={t(labels.domain)} width="1.5fr">
+        {(row: any) => (
+          <Text truncate color={row.domain ? undefined : 'muted'}>
+            {row.domain || '—'}
+          </Text>
+        )}
+      </DataColumn>
+      <DataColumn id="createdBy" label={t(labels.createdBy)} width="140px">
+        {(row: any) => (
+          <Text truncate color={row?.createUser?.username ? undefined : 'muted'}>
+            {row?.createUser?.username || '—'}
+          </Text>
+        )}
+      </DataColumn>
+      <DataColumn id="created" label={t(labels.created)} width="180px">
+        {(row: any) => row?.createdAt && <DateDistance date={new Date(row.createdAt)} />}
+      </DataColumn>
       {showActions && (
-        <DataColumn id="action" label=" " align="end">
+        <DataColumn id="action" label=" " align="end" width="50px">
           {(row: any) => {
             const websiteId = row.id;
 

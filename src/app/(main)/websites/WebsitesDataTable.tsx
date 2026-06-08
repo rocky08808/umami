@@ -1,4 +1,4 @@
-import { Icon, Row } from '@umami/react-zen';
+import { Icon, Row, Text } from '@umami/react-zen';
 import Link from '@/components/common/Link';
 import { DataGrid } from '@/components/common/DataGrid';
 import { useLoginQuery, useNavigation, useUserWebsitesQuery } from '@/components/hooks';
@@ -27,7 +27,9 @@ export function WebsitesDataTable({
       <Icon size="md" color="muted">
         <Favicon domain={row.domain} />
       </Icon>
-      <Link href={renderUrl(`/websites/${row.id}`, false)}>{row.name}</Link>
+      <Text truncate>
+        <Link href={renderUrl(`/websites/${row.id}`, false)}>{row.name}</Link>
+      </Text>
     </Row>
   );
 

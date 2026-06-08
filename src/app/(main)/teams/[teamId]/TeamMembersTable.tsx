@@ -1,4 +1,5 @@
-import { DataColumn, DataTable, Row } from '@umami/react-zen';
+import { DataColumn, DataTable, Row, Text } from '@umami/react-zen';
+import { DateDistance } from '@/components/common/DateDistance';
 import { useMessages } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
 import { TeamMemberEditButton } from './TeamMemberEditButton';
@@ -24,14 +25,17 @@ export function TeamMembersTable({
 
   return (
     <DataTable data={data}>
-      <DataColumn id="username" label={t(labels.username)}>
-        {(row: any) => row?.user?.username}
+      <DataColumn id="username" label={t(labels.username)} width="2fr">
+        {(row: any) => <Text truncate>{row?.user?.username}</Text>}
       </DataColumn>
-      <DataColumn id="role" label={t(labels.role)}>
+      <DataColumn id="role" label={t(labels.role)} width="160px">
         {(row: any) => roles[row?.role]}
       </DataColumn>
+      <DataColumn id="created" label={t(labels.created)} width="180px">
+        {(row: any) => row?.createdAt && <DateDistance date={new Date(row.createdAt)} />}
+      </DataColumn>
       {allowEdit && (
-        <DataColumn id="action" align="end">
+        <DataColumn id="action" align="end" width="100px">
           {(row: any) => {
             if (row?.role === ROLES.teamOwner) {
               return null;

@@ -1,50 +1,44 @@
-import { DataColumn, DataTable, Row } from '@umami/react-zen';
+import { DataColumn, DataTable, Icon, Row, Text } from '@umami/react-zen';
 import Link from '@/components/common/Link';
-import { TeamMemberEditButton } from '@/app/(main)/teams/[teamId]/TeamMemberEditButton';
-import { TeamMemberRemoveButton } from '@/app/(main)/teams/[teamId]/TeamMemberRemoveButton';
-import { useMessages } from '@/components/hooks';
-import { ROLES } from '@/lib/constants';
+import { DateDistance } from '@/components/common/DateDistance';
+import { useMessages, useNavigation } from '@/components/hooks';
+import { Favicon } from '@/index';
 
-export function TeamWebsitesTable({
-  teamId,
-  data = [],
-  allowEdit,
-}: {
-  teamId: string;
-  data: any[];
-  allowEdit: boolean;
-}) {
+export function TeamWebsitesTable({ data = [] }: { data: any[] }) {
   const { t, labels } = useMessages();
+  const { renderUrl } = useNavigation();
 
   return (
     <DataTable data={data}>
-      <DataColumn id="name" label={t(labels.name)}>
-        {(row: any) => <Link href={`/teams/${teamId}/websites/${row.id}`}>{row.name}</Link>}
+      <DataColumn id="name" label={t(labels.name)} width="2fr">
+        {(row: any) => (
+          <Row alignItems="center" gap="3">
+            <Icon size="md" color="muted">
+              <Favicon domain={row.domain} />
+            </Icon>
+            <Text truncate>
+              <Link href={renderUrl(`/websites/${row.id}`, false)}>{row.name}</Link>
+            </Text>
+          </Row>
+        )}
       </DataColumn>
-      <DataColumn id="domain" label={t(labels.domain)} />
-      <DataColumn id="createdBy" label={t(labels.createdBy)}>
-        {(row: any) => row?.createUser?.username}
+      <DataColumn id="domain" label={t(labels.domain)} width="1.5fr">
+        {(row: any) => (
+          <Text truncate color={row.domain ? undefined : 'muted'}>
+            {row.domain || '—'}
+          </Text>
+        )}
       </DataColumn>
-      {allowEdit && (
-        <DataColumn id="action" align="end">
-          {(row: any) => {
-            if (row?.role === ROLES.teamOwner) {
-              return null;
-            }
-
-            return (
-              <Row alignItems="center">
-                <TeamMemberEditButton teamId={teamId} userId={row?.user?.id} role={row?.role} />
-                <TeamMemberRemoveButton
-                  teamId={teamId}
-                  userId={row?.user?.id}
-                  userName={row?.user?.username}
-                />
-              </Row>
-            );
-          }}
-        </DataColumn>
-      )}
+      <DataColumn id="createdBy" label={t(labels.createdBy)} width="140px">
+        {(row: any) => (
+          <Text truncate color={row?.createUser?.username ? undefined : 'muted'}>
+            {row?.createUser?.username || '—'}
+          </Text>
+        )}
+      </DataColumn>
+      <DataColumn id="created" label={t(labels.created)} width="180px">
+        {(row: any) => row?.createdAt && <DateDistance date={new Date(row.createdAt)} />}
+      </DataColumn>
     </DataTable>
   );
 }

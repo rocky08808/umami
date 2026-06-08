@@ -42,6 +42,15 @@ export async function getWebsites(criteria: Prisma.WebsiteFindManyArgs, filters:
   return attachShareIdToWebsites(websites);
 }
 
+const websiteCreateUserInclude = {
+  createUser: {
+    select: {
+      id: true,
+      username: true,
+    },
+  },
+} as const;
+
 export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filters?: QueryFilters) {
   return getWebsites(
     {
@@ -61,6 +70,7 @@ export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filte
           },
         ],
       },
+      include: websiteCreateUserInclude,
     },
     {
       orderBy: 'name',
@@ -82,6 +92,7 @@ export async function getUserWebsites(userId: string, filters?: QueryFilters) {
             id: true,
           },
         },
+        ...websiteCreateUserInclude,
       },
     },
     {
@@ -97,14 +108,7 @@ export async function getTeamWebsites(teamId: string, filters?: QueryFilters) {
       where: {
         teamId,
       },
-      include: {
-        createUser: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
+      include: websiteCreateUserInclude,
     },
     filters,
   );

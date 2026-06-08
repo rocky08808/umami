@@ -1,4 +1,4 @@
-import { DataColumn, DataTable, type DataTableProps } from '@umami/react-zen';
+import { DataColumn, DataTable, type DataTableProps, Text } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { useMessages } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
@@ -12,17 +12,21 @@ export function TeamsTable({ renderLink, ...props }: TeamsTableProps) {
 
   return (
     <DataTable {...props}>
-      <DataColumn id="name" label={t(labels.name)}>
+      <DataColumn id="name" label={t(labels.name)} width="2fr">
         {renderLink}
       </DataColumn>
-      <DataColumn id="owner" label={t(labels.owner)}>
-        {(row: any) => row?.members?.find(({ role }) => role === ROLES.teamOwner)?.user?.username}
+      <DataColumn id="owner" label={t(labels.owner)} width="1.5fr">
+        {(row: any) => (
+          <Text truncate>
+            {row?.members?.find(({ role }) => role === ROLES.teamOwner)?.user?.username || '—'}
+          </Text>
+        )}
       </DataColumn>
-      <DataColumn id="members" label={t(labels.members)} align="end">
-        {(row: any) => row?._count?.members}
+      <DataColumn id="members" label={t(labels.members)} align="end" width="100px">
+        {(row: any) => row?._count?.members ?? 0}
       </DataColumn>
-      <DataColumn id="websites" label={t(labels.websites)} align="end">
-        {(row: any) => row?._count?.websites}
+      <DataColumn id="websites" label={t(labels.websites)} align="end" width="100px">
+        {(row: any) => row?._count?.websites ?? 0}
       </DataColumn>
     </DataTable>
   );
