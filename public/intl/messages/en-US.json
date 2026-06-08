@@ -599,6 +599,8 @@
     "select-amount": "Select amount",
     "amount-option-pro": "20 USDT",
     "amount-option-business": "200 USDT",
+    "amount-option-500": "500 USDT",
+    "amount-option-1000": "1000 USDT",
     "credit-to-balance": "Credit to balance",
     "type-balance": "Balance top-up",
     "invalid-amount": "Invalid recharge amount.",

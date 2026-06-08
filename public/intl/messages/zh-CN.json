@@ -587,6 +587,8 @@
     "select-amount": "选择充值金额",
     "amount-option-pro": "20 USDT",
     "amount-option-business": "200 USDT",
+    "amount-option-500": "500 USDT",
+    "amount-option-1000": "1000 USDT",
     "credit-to-balance": "充值到余额",
     "type-balance": "余额充值",
     "invalid-amount": "充值金额无效。",

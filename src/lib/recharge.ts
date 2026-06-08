@@ -30,6 +30,14 @@ export const RECHARGE_AMOUNT_OPTIONS = [
     amount: 200,
     labelKey: 'recharge.amount-option-business',
   },
+  {
+    amount: 500,
+    labelKey: 'recharge.amount-option-500',
+  },
+  {
+    amount: 1000,
+    labelKey: 'recharge.amount-option-1000',
+  },
 ] as const;
 
 export const RECHARGE_MIN_AMOUNT = 1;
