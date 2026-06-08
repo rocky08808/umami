@@ -1,16 +1,22 @@
 'use client';
 import { Column, Grid, Row, Text } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { GridRow } from '@/components/common/GridRow';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useAdminStatsQuery } from '@/components/hooks/queries/useAdminStatsQuery';
+import {
+  DEFAULT_ADMIN_STATS_DATE_RANGE,
+  useAdminStatsQuery,
+} from '@/components/hooks/queries/useAdminStatsQuery';
+import { DateFilter } from '@/components/input/DateFilter';
+import { MetricsBar } from '@/components/metrics/MetricsBar';
 import { formatLongCurrency, formatLongNumber } from '@/lib/format';
 import { AdminOverviewChart } from './AdminOverviewChart';
 
-function TodayStatCard({
+function StatCard({
   label,
   value,
   subValue,
@@ -24,17 +30,28 @@ function TodayStatCard({
   return (
     <Column
       gap="2"
-      padding="4"
+      paddingX="4"
+      paddingY="3"
       border
       borderRadius
       backgroundColor="surface-base"
-      minHeight="100px"
-      style={{ borderTop: `3px solid ${color}` }}
+      height="100%"
     >
-      <Text color="muted" size="sm" truncate>
-        {label}
-      </Text>
-      <Text size="xl" weight="bold" truncate>
+      <Row alignItems="center" gap="2" minWidth="0">
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: color,
+            flexShrink: 0,
+          }}
+        />
+        <Text color="muted" size="sm" truncate>
+          {label}
+        </Text>
+      </Row>
+      <Text size="2xl" weight="bold" truncate>
         {value}
       </Text>
       {subValue && (
@@ -50,17 +67,19 @@ function MetricChartPanel({
   title,
   chartLabel,
   series,
+  seriesList,
   minDate,
   maxDate,
   color,
   currency,
 }: {
   title: string;
-  chartLabel: string;
-  series: { x: string; y: number }[];
+  chartLabel?: string;
+  series?: { x: string; y: number }[];
+  seriesList?: { label: string; series: { x: string; y: number }[]; color: string }[];
   minDate: Date;
   maxDate: Date;
-  color: string;
+  color?: string;
   currency?: string;
 }) {
   return (
@@ -68,6 +87,7 @@ function MetricChartPanel({
       <AdminOverviewChart
         label={chartLabel}
         series={series}
+        seriesList={seriesList}
         minDate={minDate}
         maxDate={maxDate}
         color={color}
@@ -78,17 +98,10 @@ function MetricChartPanel({
   );
 }
 
-function formatPeriodDate(value: string) {
-  return new Date(value).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
 export function AdminOverviewPage() {
   const t = useTranslations('admin');
-  const { data, isLoading, error } = useAdminStatsQuery();
+  const [dateRange, setDateRange] = useState(DEFAULT_ADMIN_STATS_DATE_RANGE);
+  const { data, isLoading, error } = useAdminStatsQuery(dateRange);
 
   const { minDate, maxDate } = useMemo(() => {
     if (!data?.period) {
@@ -104,63 +117,87 @@ export function AdminOverviewPage() {
 
   return (
     <PageBody>
-      <Column gap="6">
+      <Column gap="4">
         <PageHeader title={t('overview')} showBorder={false} />
 
         <LoadingPanel isLoading={isLoading} error={error} data={data}>
           {data && (
-            <Column gap="6">
-              <Row
-                alignItems="center"
-                justifyContent="space-between"
-                gap="4"
-                wrap="wrap"
-                padding="4"
-                border
-                borderRadius
-                backgroundColor="surface-base"
-              >
-                <Text color="muted">{t('period')}</Text>
-                <Text>
-                  {formatPeriodDate(data.period.startAt)} — {formatPeriodDate(data.period.endAt)}
-                </Text>
-              </Row>
+            <Column gap="4">
+              <Grid columns={{ base: '1fr', md: '240px 1fr' }} gap="3" alignItems="stretch">
+                <Column
+                  gap="1"
+                  padding="4"
+                  border
+                  borderRadius
+                  backgroundColor="surface-base"
+                  justifyContent="center"
+                >
+                  <Text color="muted" size="sm">
+                    {t('total-users')}
+                  </Text>
+                  <Text size="3xl" weight="bold">
+                    {formatLongNumber(data.totalUsers)}
+                  </Text>
+                </Column>
 
-              <Column gap="3">
-                <Text weight="bold">{t('today-summary')}</Text>
-                <Grid columns={{ base: '1fr 1fr', md: '1fr 1fr 1fr', xl: 'repeat(5, 1fr)' }} gap="3">
-                  <TodayStatCard
-                    label={t('registrations-today')}
-                    value={formatLongNumber(data.registrations.today)}
+                <Row
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap="4"
+                  wrap="wrap"
+                  padding="4"
+                  border
+                  borderRadius
+                  backgroundColor="surface-base"
+                  height="100%"
+                >
+                  <Text color="muted">{t('period')}</Text>
+                  <DateFilter value={dateRange} onChange={setDateRange} renderDate />
+                </Row>
+              </Grid>
+
+              <Panel title={t('period-summary')} border borderRadius>
+                <MetricsBar gap="3" columns={{ base: '1fr 1fr', md: 'repeat(3, 1fr)', xl: 'repeat(6, 1fr)' }}>
+                  <StatCard
+                    label={t('registrations')}
+                    value={formatLongNumber(data.registrations.total)}
                     color="#3b82f6"
                   />
-                  <TodayStatCard
-                    label={t('websites-today')}
-                    value={formatLongNumber(data.websites.today)}
+                  <StatCard
+                    label={t('websites')}
+                    value={formatLongNumber(data.websites.total)}
                     color="#0ea5e9"
                   />
-                  <TodayStatCard
-                    label={t('logins-today')}
-                    value={formatLongNumber(data.logins.today)}
+                  <StatCard
+                    label={t('logins')}
+                    value={formatLongNumber(data.logins.total)}
                     color="#22c55e"
                   />
-                  <TodayStatCard
-                    label={t('recharges-today')}
-                    value={formatLongCurrency(data.recharges.today.amount, 'USDT')}
-                    subValue={t('recharges-today-count', { count: data.recharges.today.count })}
-                    color="#f97316"
+                  <StatCard
+                    label={t('recharges-approved')}
+                    value={formatLongCurrency(data.recharges.approved.amount, 'USDT')}
+                    subValue={t('recharges-approved-count', { count: data.recharges.approved.count })}
+                    color="#22c55e"
                   />
-                  <TodayStatCard
-                    label={t('subscriptions-today')}
-                    value={formatLongNumber(data.subscriptions.today)}
+                  <StatCard
+                    label={t('recharges-rejected')}
+                    value={formatLongCurrency(data.recharges.rejected.amount, 'USDT')}
+                    subValue={t('recharges-rejected-count', { count: data.recharges.rejected.count })}
+                    color="#ef4444"
+                  />
+                  <StatCard
+                    label={t('subscriptions')}
+                    value={formatLongNumber(data.subscriptions.total)}
                     color="#a855f7"
                   />
-                </Grid>
-              </Column>
+                </MetricsBar>
+              </Panel>
 
               <Column gap="3">
-                <Text weight="bold">{t('monthly-trends')}</Text>
-                <Grid columns={{ base: '1fr', lg: '1fr 1fr' }} gap="4" alignItems="stretch">
+                <Text weight="bold" size="lg">
+                  {t('trends')}
+                </Text>
+                <GridRow layout="two" gap="4" alignItems="stretch">
                   <MetricChartPanel
                     title={t('registrations-chart')}
                     chartLabel={t('registrations')}
@@ -187,11 +224,20 @@ export function AdminOverviewPage() {
                   />
                   <MetricChartPanel
                     title={t('recharges-chart')}
-                    chartLabel={t('recharges-amount')}
-                    series={data.recharges.series}
+                    seriesList={[
+                      {
+                        label: t('recharges-approved'),
+                        series: data.recharges.series.approved,
+                        color: '#22c55e',
+                      },
+                      {
+                        label: t('recharges-rejected'),
+                        series: data.recharges.series.rejected,
+                        color: '#ef4444',
+                      },
+                    ]}
                     minDate={minDate}
                     maxDate={maxDate}
-                    color="#f97316"
                     currency="USDT"
                   />
                   <MetricChartPanel
@@ -202,7 +248,7 @@ export function AdminOverviewPage() {
                     maxDate={maxDate}
                     color="#a855f7"
                   />
-                </Grid>
+                </GridRow>
               </Column>
             </Column>
           )}

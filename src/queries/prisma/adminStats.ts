@@ -1,4 +1,4 @@
-import { endOfDay, endOfMonth, startOfDay, startOfMonth } from 'date-fns';
+import { endOfDay, startOfDay } from 'date-fns';
 import { RECHARGE_ORDER_STATUS } from '@/lib/recharge';
 import prisma from '@/lib/prisma';
 import { WALLET_REFERENCE_TYPE, WALLET_TRANSACTION_TYPE } from '@/lib/wallet-constants';
@@ -6,31 +6,39 @@ import { WALLET_REFERENCE_TYPE, WALLET_TRANSACTION_TYPE } from '@/lib/wallet-con
 export type AdminStatsSeriesPoint = { x: string; y: number };
 
 export type AdminOverviewStats = {
+  totalUsers: number;
   period: {
     startAt: string;
     endAt: string;
   };
   registrations: {
-    today: number;
+    total: number;
     series: AdminStatsSeriesPoint[];
   };
   logins: {
-    today: number;
+    total: number;
     series: AdminStatsSeriesPoint[];
   };
   recharges: {
-    today: {
+    approved: {
       count: number;
       amount: number;
     };
-    series: AdminStatsSeriesPoint[];
+    rejected: {
+      count: number;
+      amount: number;
+    };
+    series: {
+      approved: AdminStatsSeriesPoint[];
+      rejected: AdminStatsSeriesPoint[];
+    };
   };
   subscriptions: {
-    today: number;
+    total: number;
     series: AdminStatsSeriesPoint[];
   };
   websites: {
-    today: number;
+    total: number;
     series: AdminStatsSeriesPoint[];
   };
 };
@@ -77,7 +85,7 @@ async function countInDateRange(table: string, dateField: string, startDate: Dat
   return Number(result?.[0]?.count ?? 0);
 }
 
-async function getDailyRechargeAmountSeries(startDate: Date, endDate: Date) {
+async function getDailyRechargeAmountSeries(startDate: Date, endDate: Date, status: string) {
   const { getDateSQL, rawQuery } = prisma;
 
   return rawQuery(
@@ -91,92 +99,120 @@ async function getDailyRechargeAmountSeries(startDate: Date, endDate: Date) {
     group by 1
     order by 1
     `,
-    { startDate, endDate, status: RECHARGE_ORDER_STATUS.approved },
-    'adminStats:recharge',
+    { startDate, endDate, status },
+    `adminStats:recharge:${status}`,
   ) as Promise<AdminStatsSeriesPoint[]>;
 }
 
-export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
-  const now = new Date();
-  const todayStart = startOfDay(now);
-  const todayEnd = endOfDay(now);
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
+export type AdminStatsPeriod = {
+  startDate: Date;
+  endDate: Date;
+};
+
+export async function getAdminOverviewStats({
+  startDate,
+  endDate,
+}: AdminStatsPeriod): Promise<AdminOverviewStats> {
+  const periodStart = startOfDay(startDate);
+  const periodEnd = endOfDay(endDate);
 
   const [
-    registrationsToday,
+    totalUsers,
+    registrationsTotal,
     registrationSeries,
-    loginsToday,
+    loginsTotal,
     loginSeries,
-    rechargesToday,
-    rechargeSeries,
-    subscriptionsToday,
+    rechargesApproved,
+    rechargesRejected,
+    rechargeApprovedSeries,
+    rechargeRejectedSeries,
+    subscriptionsTotal,
     subscriptionSeries,
-    websitesToday,
+    websitesTotal,
     websiteSeries,
   ] = await Promise.all([
     prisma.client.user.count({
+      where: { deletedAt: null },
+    }),
+    prisma.client.user.count({
       where: {
         deletedAt: null,
-        createdAt: { gte: todayStart, lte: todayEnd },
+        createdAt: { gte: periodStart, lte: periodEnd },
       },
     }),
-    getDailyCountSeries('"user"', 'created_at', monthStart, monthEnd, 'and "user".deleted_at is null'),
-    countInDateRange('user_login_event', 'created_at', todayStart, todayEnd),
-    getDailyCountSeries('user_login_event', 'created_at', monthStart, monthEnd),
+    getDailyCountSeries('"user"', 'created_at', periodStart, periodEnd, 'and "user".deleted_at is null'),
+    countInDateRange('user_login_event', 'created_at', periodStart, periodEnd),
+    getDailyCountSeries('user_login_event', 'created_at', periodStart, periodEnd),
     prisma.client.rechargeOrder.aggregate({
       where: {
         status: RECHARGE_ORDER_STATUS.approved,
-        reviewedAt: { gte: todayStart, lte: todayEnd },
+        reviewedAt: { gte: periodStart, lte: periodEnd },
       },
       _count: true,
       _sum: { amount: true },
     }),
-    getDailyRechargeAmountSeries(monthStart, monthEnd),
+    prisma.client.rechargeOrder.aggregate({
+      where: {
+        status: RECHARGE_ORDER_STATUS.rejected,
+        reviewedAt: { gte: periodStart, lte: periodEnd },
+      },
+      _count: true,
+      _sum: { amount: true },
+    }),
+    getDailyRechargeAmountSeries(periodStart, periodEnd, RECHARGE_ORDER_STATUS.approved),
+    getDailyRechargeAmountSeries(periodStart, periodEnd, RECHARGE_ORDER_STATUS.rejected),
     prisma.client.walletTransaction.count({
       where: {
         type: WALLET_TRANSACTION_TYPE.debit,
         referenceType: WALLET_REFERENCE_TYPE.subscription,
-        createdAt: { gte: todayStart, lte: todayEnd },
+        createdAt: { gte: periodStart, lte: periodEnd },
       },
     }),
     getDailyCountSeries(
       'wallet_transaction',
       'created_at',
-      monthStart,
-      monthEnd,
+      periodStart,
+      periodEnd,
       `and wallet_transaction.type = '${WALLET_TRANSACTION_TYPE.debit}' and wallet_transaction.reference_type = '${WALLET_REFERENCE_TYPE.subscription}'`,
     ),
-    countInDateRange('website', 'created_at', todayStart, todayEnd, 'and website.deleted_at is null'),
-    getDailyCountSeries('website', 'created_at', monthStart, monthEnd, 'and website.deleted_at is null'),
+    countInDateRange('website', 'created_at', periodStart, periodEnd, 'and website.deleted_at is null'),
+    getDailyCountSeries('website', 'created_at', periodStart, periodEnd, 'and website.deleted_at is null'),
   ]);
 
   return {
+    totalUsers,
     period: {
-      startAt: monthStart.toISOString(),
-      endAt: monthEnd.toISOString(),
+      startAt: periodStart.toISOString(),
+      endAt: periodEnd.toISOString(),
     },
     registrations: {
-      today: registrationsToday,
+      total: registrationsTotal,
       series: registrationSeries,
     },
     logins: {
-      today: loginsToday,
+      total: loginsTotal,
       series: loginSeries,
     },
     recharges: {
-      today: {
-        count: rechargesToday._count,
-        amount: Number(rechargesToday._sum.amount ?? 0),
+      approved: {
+        count: rechargesApproved._count,
+        amount: Number(rechargesApproved._sum.amount ?? 0),
       },
-      series: rechargeSeries,
+      rejected: {
+        count: rechargesRejected._count,
+        amount: Number(rechargesRejected._sum.amount ?? 0),
+      },
+      series: {
+        approved: rechargeApprovedSeries,
+        rejected: rechargeRejectedSeries,
+      },
     },
     subscriptions: {
-      today: subscriptionsToday,
+      total: subscriptionsTotal,
       series: subscriptionSeries,
     },
     websites: {
-      today: websitesToday,
+      total: websitesTotal,
       series: websiteSeries,
     },
   };
