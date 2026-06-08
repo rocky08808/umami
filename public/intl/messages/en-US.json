@@ -661,6 +661,8 @@
     "recharges-chart": "Recharge trends",
     "recharges-amount": "Recharge amount",
     "subscriptions": "Subscriptions",
-    "subscriptions-chart": "Subscription trends"
+    "subscriptions-active": "Active subscriptions",
+    "subscriptions-new": "New subscriptions",
+    "subscriptions-chart": "New subscription trends"
   }
 }

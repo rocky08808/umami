@@ -649,6 +649,8 @@
     "recharges-chart": "充值趋势",
     "recharges-amount": "充值金额",
     "subscriptions": "订阅",
-    "subscriptions-chart": "订阅趋势"
+    "subscriptions-active": "有效订阅",
+    "subscriptions-new": "新增订阅",
+    "subscriptions-chart": "新增订阅趋势"
   }
 }

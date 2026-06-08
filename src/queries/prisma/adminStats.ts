@@ -1,7 +1,6 @@
 import { endOfDay, startOfDay } from 'date-fns';
 import { RECHARGE_ORDER_STATUS } from '@/lib/recharge';
 import prisma from '@/lib/prisma';
-import { WALLET_REFERENCE_TYPE, WALLET_TRANSACTION_TYPE } from '@/lib/wallet-constants';
 
 export type AdminStatsSeriesPoint = { x: string; y: number };
 
@@ -34,7 +33,8 @@ export type AdminOverviewStats = {
     };
   };
   subscriptions: {
-    total: number;
+    active: number;
+    periodNew: number;
     series: AdminStatsSeriesPoint[];
   };
   websites: {
@@ -126,7 +126,8 @@ export async function getAdminOverviewStats({
     rechargesRejected,
     rechargeApprovedSeries,
     rechargeRejectedSeries,
-    subscriptionsTotal,
+    activeSubscriptions,
+    periodNewSubscriptions,
     subscriptionSeries,
     websitesTotal,
     websiteSeries,
@@ -161,19 +162,24 @@ export async function getAdminOverviewStats({
     }),
     getDailyRechargeAmountSeries(periodStart, periodEnd, RECHARGE_ORDER_STATUS.approved),
     getDailyRechargeAmountSeries(periodStart, periodEnd, RECHARGE_ORDER_STATUS.rejected),
-    prisma.client.walletTransaction.count({
+    prisma.client.userSubscription.count({
       where: {
-        type: WALLET_TRANSACTION_TYPE.debit,
-        referenceType: WALLET_REFERENCE_TYPE.subscription,
+        plan: { not: 'hobby' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    }),
+    prisma.client.userSubscription.count({
+      where: {
+        plan: { not: 'hobby' },
         createdAt: { gte: periodStart, lte: periodEnd },
       },
     }),
     getDailyCountSeries(
-      'wallet_transaction',
+      'user_subscription',
       'created_at',
       periodStart,
       periodEnd,
-      `and wallet_transaction.type = '${WALLET_TRANSACTION_TYPE.debit}' and wallet_transaction.reference_type = '${WALLET_REFERENCE_TYPE.subscription}'`,
+      `and user_subscription.plan != 'hobby'`,
     ),
     countInDateRange('website', 'created_at', periodStart, periodEnd, 'and website.deleted_at is null'),
     getDailyCountSeries('website', 'created_at', periodStart, periodEnd, 'and website.deleted_at is null'),
@@ -208,7 +214,8 @@ export async function getAdminOverviewStats({
       },
     },
     subscriptions: {
-      total: subscriptionsTotal,
+      active: activeSubscriptions,
+      periodNew: periodNewSubscriptions,
       series: subscriptionSeries,
     },
     websites: {

@@ -123,7 +123,7 @@ export function AdminOverviewPage() {
         <LoadingPanel isLoading={isLoading} error={error} data={data}>
           {data && (
             <Column gap="4">
-              <Grid columns={{ base: '1fr', md: '240px 1fr' }} gap="3" alignItems="stretch">
+              <Grid columns={{ base: '1fr', md: 'repeat(2, 200px) 1fr' }} gap="3" alignItems="stretch">
                 <Column
                   gap="1"
                   padding="4"
@@ -137,6 +137,22 @@ export function AdminOverviewPage() {
                   </Text>
                   <Text size="3xl" weight="bold">
                     {formatLongNumber(data.totalUsers)}
+                  </Text>
+                </Column>
+
+                <Column
+                  gap="1"
+                  padding="4"
+                  border
+                  borderRadius
+                  backgroundColor="surface-base"
+                  justifyContent="center"
+                >
+                  <Text color="muted" size="sm">
+                    {t('subscriptions-active')}
+                  </Text>
+                  <Text size="3xl" weight="bold">
+                    {formatLongNumber(data.subscriptions.active)}
                   </Text>
                 </Column>
 
@@ -186,8 +202,8 @@ export function AdminOverviewPage() {
                     color="#ef4444"
                   />
                   <StatCard
-                    label={t('subscriptions')}
-                    value={formatLongNumber(data.subscriptions.total)}
+                    label={t('subscriptions-new')}
+                    value={formatLongNumber(data.subscriptions.periodNew)}
                     color="#a855f7"
                   />
                 </MetricsBar>
@@ -242,7 +258,7 @@ export function AdminOverviewPage() {
                   />
                   <MetricChartPanel
                     title={t('subscriptions-chart')}
-                    chartLabel={t('subscriptions')}
+                    chartLabel={t('subscriptions-new')}
                     series={data.subscriptions.series}
                     minDate={minDate}
                     maxDate={maxDate}
