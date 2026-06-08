@@ -13,7 +13,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   const isAllowed =
     navItems.length === 0 ||
-    navItems.some(({ path }) => pathname === path || pathname.startsWith(`${path}/`));
+    navItems
+      .slice()
+      .sort((a, b) => b.path.length - a.path.length)
+      .some(({ path }) => pathname === path || pathname.startsWith(`${path}/`));
 
   useEffect(() => {
     if (!user?.isAdmin || process.env.cloudMode) {

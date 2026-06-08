@@ -1,7 +1,7 @@
 import type { Config } from '@/components/hooks/useConfig';
 import { ROLES } from '@/lib/constants';
 
-export type AdminNavItemId = 'users' | 'websites' | 'teams' | 'recharge';
+export type AdminNavItemId = 'overview' | 'users' | 'websites' | 'teams' | 'recharge';
 
 export type AdminNavUser = {
   isAdmin: boolean;
@@ -18,6 +18,7 @@ export function canAccessAdminNavItem(
   }
 
   switch (item) {
+    case 'overview':
     case 'users':
     case 'websites':
     case 'teams':
@@ -34,5 +35,5 @@ export function canAccessSettingsBilling(user?: AdminNavUser | null) {
 }
 
 export function getFirstAdminNavPath(items: { path: string }[]) {
-  return items[0]?.path ?? '/admin/users';
+  return items[0]?.path ?? '/admin';
 }

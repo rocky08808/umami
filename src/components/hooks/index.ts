@@ -11,6 +11,7 @@ export * from './context/useWebsite';
 
 // Query hooks
 export * from './useAdminNavItems';
+export * from './queries/useAdminStatsQuery';
 export * from './queries/useAdminRechargeOrdersQuery';
 export * from './queries/useBillingUsageQuery';
 export * from './queries/useRechargeOrdersQuery';

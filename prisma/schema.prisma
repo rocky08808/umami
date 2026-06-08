@@ -31,8 +31,21 @@ model User {
   rechargeOrders     RechargeOrder[]
   userWallet         UserWallet?
   walletTransactions WalletTransaction[]
+  loginEvents        UserLoginEvent[]
 
   @@map("user")
+}
+
+model UserLoginEvent {
+  id        String    @id() @map("user_login_event_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("user_login_event")
 }
 
 model UserSubscription {

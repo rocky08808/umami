@@ -21,7 +21,10 @@ export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
         ]
       : [];
 
-  const selectedKey = navItems.find(({ path }) => pathname.startsWith(path))?.id;
+  const selectedKey = navItems
+    .slice()
+    .sort((a, b) => b.path.length - a.path.length)
+    .find(({ path }) => pathname === path || pathname.startsWith(`${path}/`))?.id;
 
   return (
     <Column gap="2">

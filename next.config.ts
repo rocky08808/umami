@@ -148,11 +148,6 @@ const redirects = [
     destination: '/teams/:id/settings/preferences',
     permanent: false,
   },
-  {
-    source: '/admin',
-    destination: '/admin/users',
-    permanent: false,
-  },
 ];
 
 // Adding rewrites + headers for all alternative tracker script names.

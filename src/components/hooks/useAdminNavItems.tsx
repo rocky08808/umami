@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Globe, User, Users, Wallet } from '@/components/icons';
+import { Globe, PanelsLeftBottom, User, Users, Wallet } from '@/components/icons';
 import { canAccessAdminNavItem } from '@/lib/admin-nav';
 import { useConfig } from './useConfig';
 import { useLoginQuery } from './queries/useLoginQuery';
@@ -18,6 +18,13 @@ export function useAdminNavItems(): AdminNavItem[] {
   const { t, labels } = useMessages();
 
   const items: (AdminNavItem & { permission: Parameters<typeof canAccessAdminNavItem>[0] })[] = [
+    {
+      id: 'overview',
+      permission: 'overview',
+      label: t('admin.overview'),
+      path: '/admin',
+      icon: <PanelsLeftBottom />,
+    },
     {
       id: 'users',
       permission: 'users',

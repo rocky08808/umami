@@ -8,6 +8,7 @@ import redis from '@/lib/redis';
 import { parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { getAllUserTeams, getUserByUsername } from '@/queries/prisma';
+import { createUserLoginEvent } from '@/queries/prisma/userLoginEvent';
 
 export async function POST(request: Request) {
   const schema = z.object({
@@ -40,6 +41,10 @@ export async function POST(request: Request) {
   }
 
   const teams = await getAllUserTeams(id);
+
+  try {
+    await createUserLoginEvent(id);
+  } catch {}
 
   return json({
     token,

@@ -640,5 +640,28 @@
     "admin-note-label": "Admin note",
     "approve": "Approve",
     "reject": "Reject"
+  },
+  "admin": {
+    "overview": "Overview",
+    "period": "Period",
+    "today-summary": "Today",
+    "monthly-trends": "This month",
+    "registrations": "Registrations",
+    "registrations-today": "Registrations today",
+    "registrations-chart": "Registrations this month",
+    "websites": "Websites",
+    "websites-today": "Websites created today",
+    "websites-chart": "Websites created this month",
+    "logins": "Logins",
+    "logins-today": "Logins today",
+    "logins-chart": "Logins this month",
+    "recharges": "Recharges",
+    "recharges-today": "Recharged today",
+    "recharges-today-count": "{count, plural, one {# approved order} other {# approved orders}}",
+    "recharges-chart": "Recharges this month",
+    "recharges-amount": "Recharge amount",
+    "subscriptions": "Subscriptions",
+    "subscriptions-today": "Subscriptions today",
+    "subscriptions-chart": "Subscriptions this month"
   }
 }
