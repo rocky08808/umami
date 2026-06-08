@@ -1,8 +1,9 @@
 import { Column, Focusable, Row, Text, Tooltip, TooltipTrigger } from '@umami/react-zen';
 import Link from '@/components/common/Link';
 import { IconLabel } from '@/components/common/IconLabel';
-import { useMessages, useNavigation } from '@/components/hooks';
+import { useConfig, useLoginQuery, useMessages, useNavigation } from '@/components/hooks';
 import { ArrowLeft, BarChart3, Coins, CreditCard, Settings2, UserCircle, Users, Wallet } from '@/components/icons';
+import { canAccessSettingsBilling } from '@/lib/admin-nav';
 
 export function SettingsNav({
   isCollapsed,
@@ -13,6 +14,42 @@ export function SettingsNav({
 }) {
   const { t, labels } = useMessages();
   const { renderUrl, pathname } = useNavigation();
+  const { user } = useLoginQuery();
+  const config = useConfig();
+  const showBilling = canAccessSettingsBilling(user);
+
+  const administrationItems = showBilling
+    ? [
+        {
+          id: 'billing',
+          label: t(labels.billing),
+          path: renderUrl('/settings/billing'),
+          icon: <CreditCard />,
+        },
+        {
+          id: 'usage',
+          label: t(labels.usage),
+          path: renderUrl('/settings/usage'),
+          icon: <BarChart3 />,
+        },
+        {
+          id: 'balance',
+          label: t(labels.balance),
+          path: renderUrl('/settings/balance'),
+          icon: <Coins />,
+        },
+        ...(config?.usdtWalletAddress
+          ? [
+              {
+                id: 'recharge',
+                label: t(labels.recharge),
+                path: renderUrl('/settings/recharge'),
+                icon: <Wallet />,
+              },
+            ]
+          : []),
+      ]
+    : [];
 
   const items = [
     {
@@ -43,35 +80,14 @@ export function SettingsNav({
         },
       ],
     },
-    {
-      label: t(labels.administration),
-      items: [
-        {
-          id: 'billing',
-          label: t(labels.billing),
-          path: renderUrl('/settings/billing'),
-          icon: <CreditCard />,
-        },
-        {
-          id: 'usage',
-          label: t(labels.usage),
-          path: renderUrl('/settings/usage'),
-          icon: <BarChart3 />,
-        },
-        {
-          id: 'balance',
-          label: t(labels.balance),
-          path: renderUrl('/settings/balance'),
-          icon: <Coins />,
-        },
-        {
-          id: 'recharge',
-          label: t(labels.recharge),
-          path: renderUrl('/settings/recharge'),
-          icon: <Wallet />,
-        },
-      ],
-    },
+    ...(administrationItems.length
+      ? [
+          {
+            label: t(labels.administration),
+            items: administrationItems,
+          },
+        ]
+      : []),
   ];
 
   const selectedKey = items

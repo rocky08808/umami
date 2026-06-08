@@ -59,18 +59,23 @@ export function NavMenu({
         </Row>
       )}
       <Column gap="6" {...props}>
-        {items?.map(({ label, items }, index) => {
+        {items?.map(({ label, items: sectionItems }, index) => {
+          if (!sectionItems?.length) {
+            return null;
+          }
+
           if (label) {
             return (
               <Column key={`${label}${index}`} gap="2" marginBottom="3" minHeight="40px">
                 <Row padding>
                   <Text weight="bold">{label}</Text>
                 </Row>
-                {renderItems(items)}
+                {renderItems(sectionItems)}
               </Column>
             );
           }
-          return null;
+
+          return <Column key={`section-${index}`}>{renderItems(sectionItems)}</Column>;
         })}
       </Column>
     </Column>

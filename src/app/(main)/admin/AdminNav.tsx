@@ -1,49 +1,27 @@
 import { IconLabel } from '@/components/common/IconLabel';
 import { NavMenu } from '@/components/common/NavMenu';
+import { useAdminNavItems } from '@/components/hooks/useAdminNavItems';
 import { useMessages, useNavigation } from '@/components/hooks';
-import { ArrowLeft, Globe, User, Users, Wallet } from '@/components/icons';
+import { ArrowLeft } from '@/components/icons';
 import { Column, Focusable, Row, Tooltip, TooltipTrigger } from '@umami/react-zen';
 import Link from '@/components/common/Link';
 
 export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
   const { t, labels } = useMessages();
   const { pathname, renderUrl } = useNavigation();
+  const navItems = useAdminNavItems();
 
-  const items = [
-    {
-      label: t(labels.manage),
-      items: [
-        {
-          id: 'users',
-          label: t(labels.users),
-          path: '/admin/users',
-          icon: <User />,
-        },
-        {
-          id: 'websites',
-          label: t(labels.websites),
-          path: '/admin/websites',
-          icon: <Globe />,
-        },
-        {
-          id: 'teams',
-          label: t(labels.teams),
-          path: '/admin/teams',
-          icon: <Users />,
-        },
-        {
-          id: 'recharge',
-          label: t(labels.rechargeReview),
-          path: '/admin/recharge',
-          icon: <Wallet />,
-        },
-      ],
-    },
-  ];
+  const items =
+    navItems.length > 0
+      ? [
+          {
+            label: t(labels.manage),
+            items: navItems,
+          },
+        ]
+      : [];
 
-  const selectedKey = items
-    .flatMap(e => e.items)
-    ?.find(({ path }) => path && pathname.startsWith(path))?.id;
+  const selectedKey = navItems.find(({ path }) => pathname.startsWith(path))?.id;
 
   return (
     <Column gap="2">
@@ -62,12 +40,14 @@ export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
           <Tooltip placement="right">{t(labels.back)}</Tooltip>
         </TooltipTrigger>
       </Link>
-      <NavMenu
-        items={items}
-        selectedKey={selectedKey}
-        allowMinimize={false}
-        onItemClick={onItemClick}
-      />
+      {items.length > 0 && (
+        <NavMenu
+          items={items}
+          selectedKey={selectedKey}
+          allowMinimize={false}
+          onItemClick={onItemClick}
+        />
+      )}
     </Column>
   );
 }
