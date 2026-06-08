@@ -47,6 +47,7 @@ export * from './queries/useSessionDataQuery';
 export * from './queries/useSessionDataValuesQuery';
 export * from './queries/useSessionReplaysQuery';
 export * from './queries/useShareTokenQuery';
+export * from './queries/useTeamAvailableUsersQuery';
 export * from './queries/useTeamMembersQuery';
 export * from './queries/useTeamQuery';
 export * from './queries/useTeamsQuery';

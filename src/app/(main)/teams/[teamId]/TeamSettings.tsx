@@ -41,7 +41,7 @@ export function TeamSettings({ teamId }: { teamId: string }) {
       <Panel>
         <Row alignItems="center" justifyContent="space-between">
           <Heading size="base">{t(labels.members)}</Heading>
-          {isAdmin && <TeamsMemberAddButton teamId={teamId} />}
+          {canEdit && <TeamsMemberAddButton teamId={teamId} />}
         </Row>
         <TeamMembersDataTable teamId={teamId} allowEdit={canEdit} />
       </Panel>

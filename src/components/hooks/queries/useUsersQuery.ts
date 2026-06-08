@@ -1,8 +1,9 @@
+import type { ReactQueryOptions } from '@/lib/types';
 import { useApi } from '../useApi';
 import { useModified } from '../useModified';
 import { usePagedQuery } from '../usePagedQuery';
 
-export function useUsersQuery() {
+export function useUsersQuery(options?: ReactQueryOptions) {
   const { get } = useApi();
   const { modified } = useModified(`users`);
 
@@ -13,5 +14,6 @@ export function useUsersQuery() {
         ...pageParams,
       });
     },
+    ...options,
   });
 }
