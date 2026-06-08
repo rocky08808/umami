@@ -542,6 +542,8 @@
     "title": "用量",
     "plan": "方案",
     "billing-period": "账单周期",
+    "period": "统计周期",
+    "quota-period-note": "下方网站/事件用量为套餐限额（按自然月统计），图表与明细随所选周期变化。",
     "events": "事件",
     "total": "总计",
     "breakdown": "用量",

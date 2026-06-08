@@ -1,15 +1,21 @@
 'use client';
 import { Column, Grid, ProgressBar, Row, Text } from '@umami/react-zen';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from '@/components/common/Link';
 import { LinkButton } from '@/components/common/LinkButton';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { PageBody } from '@/components/common/PageBody';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Panel } from '@/components/common/Panel';
-import { useBillingUsageQuery, useNavigation, useSubscription } from '@/components/hooks';
-import { formatUsagePercent, getBillingPeriod } from '@/lib/billing-usage';
+import {
+  DEFAULT_USAGE_DATE_RANGE,
+  useBillingUsageQuery,
+  useNavigation,
+  useSubscription,
+} from '@/components/hooks';
+import { DateFilter } from '@/components/input/DateFilter';
+import { formatUsagePercent } from '@/lib/billing-usage';
 import { getCurrentPlanId, PLANS } from '@/lib/billing';
 import { formatLongNumber } from '@/lib/format';
 import type { UsageCategory } from '@/queries/sql/billing/getOwnerUsageMetrics';
@@ -21,14 +27,6 @@ const USAGE_CATEGORIES: UsageCategory[] = [
   'session-data',
   'heatmaps',
 ];
-
-function formatPeriodDate(value: string) {
-  return new Date(value).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
 
 function UsageQuotaCard({
   label,
@@ -141,28 +139,22 @@ export function UsagePage() {
   const t = useTranslations();
   const { renderUrl } = useNavigation();
   const subscription = useSubscription();
-  const { data, isLoading, error } = useBillingUsageQuery();
+  const [dateRange, setDateRange] = useState(DEFAULT_USAGE_DATE_RANGE);
+  const { data, isLoading, error } = useBillingUsageQuery(dateRange);
   const currentPlanId = getCurrentPlanId(subscription);
   const plan = PLANS.find(item => item.id === currentPlanId);
 
   const period = useMemo(() => {
-    if (data?.period) {
-      return {
-        startDate: new Date(data.period.startAt),
-        endDate: new Date(data.period.endAt),
-        chartEndDate: getBillingPeriod(data.subscription?.expiresAt).endDate,
-        chartStartDate: getBillingPeriod(data.subscription?.expiresAt).startDate,
-      };
+    if (!data?.period) {
+      const now = new Date();
+      return { startDate: now, endDate: now };
     }
 
-    const fallback = getBillingPeriod();
     return {
-      startDate: fallback.periodStart,
-      endDate: fallback.periodEnd,
-      chartStartDate: fallback.startDate,
-      chartEndDate: fallback.endDate,
+      startDate: new Date(data.period.startAt),
+      endDate: new Date(data.period.endAt),
     };
-  }, [data?.period, data?.subscription?.expiresAt]);
+  }, [data?.period]);
 
   const events = data?.events;
   const websites = data?.websites;
@@ -222,17 +214,18 @@ export function UsagePage() {
                 </Row>
               </Row>
 
-              <Row alignItems="center" gap="2">
-                <Text color="muted">{t('usage.billing-period')}</Text>
-                <Text>
-                  {formatPeriodDate(period.startDate.toISOString())} —{' '}
-                  {formatPeriodDate(period.endDate.toISOString())}
-                </Text>
+              <Row alignItems="center" gap="2" wrap="wrap">
+                <Text color="muted">{t('usage.period')}</Text>
+                <DateFilter value={dateRange} onChange={setDateRange} renderDate />
               </Row>
             </Row>
 
             {(websites || events) && (
-              <Grid columns={{ base: '1fr', md: '1fr 1fr' }} gap="4">
+              <Column gap="2">
+                <Text color="muted" size="sm">
+                  {t('usage.quota-period-note')}
+                </Text>
+                <Grid columns={{ base: '1fr', md: '1fr 1fr' }} gap="4">
                 {websites && (
                   <UsageQuotaCard
                     label={t('usage.quota-websites')}
@@ -266,6 +259,7 @@ export function UsagePage() {
                   />
                 )}
               </Grid>
+              </Column>
             )}
 
             <Panel
@@ -289,8 +283,8 @@ export function UsagePage() {
                     heatmaps: [],
                   }
                 }
-                minDate={period.chartStartDate}
-                maxDate={period.chartEndDate}
+                minDate={period.startDate}
+                maxDate={period.endDate}
               />
             </Panel>
 

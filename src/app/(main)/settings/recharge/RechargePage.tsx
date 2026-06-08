@@ -30,6 +30,7 @@ import {
   RECHARGE_MAX_PENDING_ORDERS_PER_USER,
   RECHARGE_MIN_AMOUNT,
   RECHARGE_ORDER_STATUS,
+  DEFAULT_RECHARGE_AMOUNT,
   formatAmountDisplay,
   isAutoRechargeTxId,
   parseRechargeAmount,
@@ -53,7 +54,7 @@ export function RechargePage() {
   const { toast } = useToast();
   const { data: orders = [], refetch: refetchOrders } = useRechargeOrdersQuery();
   const { data: wallet, refetch: refetchWallet } = useWalletQuery();
-  const [amountInput, setAmountInput] = useState(String(RECHARGE_AMOUNT_OPTIONS[0].amount));
+  const [amountInput, setAmountInput] = useState(String(DEFAULT_RECHARGE_AMOUNT));
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {

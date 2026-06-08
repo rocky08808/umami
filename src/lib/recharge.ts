@@ -40,6 +40,8 @@ export const RECHARGE_AMOUNT_OPTIONS = [
   },
 ] as const;
 
+export const DEFAULT_RECHARGE_AMOUNT = 200;
+
 export const RECHARGE_MIN_AMOUNT = 1;
 export const RECHARGE_MAX_AMOUNT = 100_000;
 

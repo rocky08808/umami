@@ -554,6 +554,8 @@
     "title": "Usage",
     "plan": "Plan",
     "billing-period": "Billing period",
+    "period": "Period",
+    "quota-period-note": "Website and event quotas below reflect plan limits (calendar month). Charts and breakdowns follow the selected period.",
     "events": "Events",
     "total": "Total",
     "breakdown": "Usage",

@@ -1,3 +1,5 @@
+import { endOfDay, startOfDay } from 'date-fns';
+import { z } from 'zod';
 import { getBillingPeriod } from '@/lib/billing-usage';
 import { getOwnerMonthlyEventUsage } from '@/lib/billing-events';
 import { getOwnerWebsiteUsage, isSelfHostedBilling } from '@/lib/billing-limits';
@@ -7,8 +9,13 @@ import { getUserSubscriptionDetails } from '@/lib/subscription';
 import { getOwnerUsageMetrics } from '@/queries/sql/billing/getOwnerUsageMetrics';
 import { getOwnerWebsiteEventUsage } from '@/queries/sql/billing/getOwnerWebsiteEventUsage';
 
+const schema = z.object({
+  startAt: z.coerce.number().optional(),
+  endAt: z.coerce.number().optional(),
+});
+
 export async function GET(request: Request) {
-  const { auth, error } = await parseRequest(request);
+  const { auth, query, error } = await parseRequest(request, schema);
 
   if (error) {
     return error();
@@ -31,10 +38,19 @@ export async function GET(request: Request) {
     getOwnerWebsiteUsage(auth.user.id),
   ]);
 
-  const period = getBillingPeriod(subscription.expiresAt);
+  const fallbackPeriod = getBillingPeriod(subscription.expiresAt);
+  const startDate =
+    query.startAt != null && query.endAt != null
+      ? startOfDay(new Date(query.startAt))
+      : fallbackPeriod.startDate;
+  const endDate =
+    query.startAt != null && query.endAt != null
+      ? endOfDay(new Date(query.endAt))
+      : fallbackPeriod.endDate;
+
   const [metrics, sources] = await Promise.all([
-    getOwnerUsageMetrics(auth.user.id, period.startDate, period.endDate),
-    getOwnerWebsiteEventUsage(auth.user.id, period.startDate, period.endDate),
+    getOwnerUsageMetrics(auth.user.id, startDate, endDate),
+    getOwnerWebsiteEventUsage(auth.user.id, startDate, endDate),
   ]);
 
   return json({
@@ -42,8 +58,8 @@ export async function GET(request: Request) {
     events,
     websites,
     period: {
-      startAt: period.periodStart.toISOString(),
-      endAt: period.periodEnd.toISOString(),
+      startAt: startDate.toISOString(),
+      endAt: endDate.toISOString(),
     },
     metrics,
     sources,
