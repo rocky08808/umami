@@ -123,7 +123,7 @@ export function AdminOverviewPage() {
         <LoadingPanel isLoading={isLoading} error={error} data={data}>
           {data && (
             <Column gap="4">
-              <Grid columns={{ base: '1fr', md: 'repeat(2, 200px) 1fr' }} gap="3" alignItems="stretch">
+              <Grid columns={{ base: '1fr', md: 'repeat(3, 160px) 1fr' }} gap="3" alignItems="stretch">
                 <Column
                   gap="1"
                   padding="4"
@@ -147,12 +147,30 @@ export function AdminOverviewPage() {
                   borderRadius
                   backgroundColor="surface-base"
                   justifyContent="center"
+                  style={{ borderTop: '3px solid #8b5cf6' }}
                 >
                   <Text color="muted" size="sm">
-                    {t('subscriptions-active')}
+                    {t('subscriptions-active-pro')}
                   </Text>
                   <Text size="3xl" weight="bold">
-                    {formatLongNumber(data.subscriptions.active)}
+                    {formatLongNumber(data.subscriptions.active.pro)}
+                  </Text>
+                </Column>
+
+                <Column
+                  gap="1"
+                  padding="4"
+                  border
+                  borderRadius
+                  backgroundColor="surface-base"
+                  justifyContent="center"
+                  style={{ borderTop: '3px solid #6366f1' }}
+                >
+                  <Text color="muted" size="sm">
+                    {t('subscriptions-active-business')}
+                  </Text>
+                  <Text size="3xl" weight="bold">
+                    {formatLongNumber(data.subscriptions.active.business)}
                   </Text>
                 </Column>
 
@@ -173,7 +191,7 @@ export function AdminOverviewPage() {
               </Grid>
 
               <Panel title={t('period-summary')} border borderRadius>
-                <MetricsBar gap="3" columns={{ base: '1fr 1fr', md: 'repeat(3, 1fr)', xl: 'repeat(6, 1fr)' }}>
+                <MetricsBar gap="3" columns={{ base: '1fr 1fr', md: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' }}>
                   <StatCard
                     label={t('registrations')}
                     value={formatLongNumber(data.registrations.total)}
@@ -202,9 +220,18 @@ export function AdminOverviewPage() {
                     color="#ef4444"
                   />
                   <StatCard
-                    label={t('subscriptions-new')}
-                    value={formatLongNumber(data.subscriptions.periodNew)}
-                    color="#a855f7"
+                    label={t('subscriptions-debit-pro')}
+                    value={formatLongCurrency(data.subscriptions.debits.pro.amount, 'USDT')}
+                    subValue={t('subscriptions-debit-count', { count: data.subscriptions.debits.pro.count })}
+                    color="#8b5cf6"
+                  />
+                  <StatCard
+                    label={t('subscriptions-debit-business')}
+                    value={formatLongCurrency(data.subscriptions.debits.business.amount, 'USDT')}
+                    subValue={t('subscriptions-debit-count', {
+                      count: data.subscriptions.debits.business.count,
+                    })}
+                    color="#6366f1"
                   />
                 </MetricsBar>
               </Panel>
@@ -257,12 +284,22 @@ export function AdminOverviewPage() {
                     currency="USDT"
                   />
                   <MetricChartPanel
-                    title={t('subscriptions-chart')}
-                    chartLabel={t('subscriptions-new')}
-                    series={data.subscriptions.series}
+                    title={t('subscriptions-debit-chart')}
+                    seriesList={[
+                      {
+                        label: t('subscriptions-debit-pro'),
+                        series: data.subscriptions.series.debits.pro,
+                        color: '#8b5cf6',
+                      },
+                      {
+                        label: t('subscriptions-debit-business'),
+                        series: data.subscriptions.series.debits.business,
+                        color: '#6366f1',
+                      },
+                    ]}
                     minDate={minDate}
                     maxDate={maxDate}
-                    color="#a855f7"
+                    currency="USDT"
                   />
                 </GridRow>
               </Column>

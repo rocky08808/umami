@@ -649,8 +649,11 @@
     "recharges-chart": "充值趋势",
     "recharges-amount": "充值金额",
     "subscriptions": "订阅",
-    "subscriptions-active": "有效订阅",
-    "subscriptions-new": "新增订阅",
-    "subscriptions-chart": "新增订阅趋势"
+    "subscriptions-active-pro": "Pro 有效订阅",
+    "subscriptions-active-business": "Business 有效订阅",
+    "subscriptions-debit-pro": "Pro 扣款",
+    "subscriptions-debit-business": "Business 扣款",
+    "subscriptions-debit-count": "共 {count} 笔",
+    "subscriptions-debit-chart": "扣款趋势"
   }
 }

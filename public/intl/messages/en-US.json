@@ -661,8 +661,11 @@
     "recharges-chart": "Recharge trends",
     "recharges-amount": "Recharge amount",
     "subscriptions": "Subscriptions",
-    "subscriptions-active": "Active subscriptions",
-    "subscriptions-new": "New subscriptions",
-    "subscriptions-chart": "New subscription trends"
+    "subscriptions-active-pro": "Active Pro",
+    "subscriptions-active-business": "Active Business",
+    "subscriptions-debit-pro": "Pro debits",
+    "subscriptions-debit-business": "Business debits",
+    "subscriptions-debit-count": "{count, plural, one {# debit} other {# debits}}",
+    "subscriptions-debit-chart": "Debit trends"
   }
 }
