@@ -50,6 +50,10 @@ export async function fetchIncomingUsdtTransfers(
     },
   );
 
+  if (response.status === 429) {
+    return [];
+  }
+
   if (!response.ok) {
     throw new Error(`Tron API request failed with status ${response.status}.`);
   }

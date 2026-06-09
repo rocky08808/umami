@@ -1,6 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { readReplicas } from '@prisma/extension-read-replicas';
 import debug from 'debug';
+import { Pool } from 'pg';
 import { PrismaClient } from '@/generated/prisma/client';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS, SESSION_COLUMNS } from './constants';
 import { filtersObjectToArray } from './params';
@@ -9,6 +10,52 @@ import type { Operator, QueryFilters, QueryOptions } from './types';
 const log = debug('umami:prisma');
 
 const PRISMA = 'prisma';
+
+const CONNECTION_ERROR_CODES = new Set(['P1001', 'P1017']);
+
+function isConnectionError(error: unknown) {
+  return (
+    typeof error === 'object'
+    && error !== null
+    && 'code' in error
+    && CONNECTION_ERROR_CODES.has(String((error as { code: string }).code))
+  );
+}
+
+function createPgPool(connectionString: string) {
+  return new Pool({
+    connectionString,
+    max: 10,
+    idleTimeoutMillis: 20_000,
+    connectionTimeoutMillis: 10_000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
+  });
+}
+
+function withConnectionRetry<T extends PrismaClient>(client: T) {
+  return client.$extends({
+    query: {
+      async $allOperations({ args, query }) {
+        try {
+          return await query(args);
+        } catch (error) {
+          if (!isConnectionError(error)) {
+            throw error;
+          }
+
+          try {
+            await client.$connect();
+          } catch {
+            // Retry once even if reconnect fails.
+          }
+
+          return await query(args);
+        }
+      },
+    },
+  });
+}
 
 const PRISMA_LOG_OPTIONS = {
   log: [
@@ -368,18 +415,28 @@ function getSchema() {
 }
 
 function getClient() {
+  if (globalThis[PRISMA]) {
+    return globalThis[PRISMA];
+  }
+
   const url = process.env.DATABASE_URL;
   const replicaUrl = process.env.DATABASE_REPLICA_URL;
   const logQuery = process.env.LOG_QUERY;
   const schema = getSchema();
 
-  const baseAdapter = new PrismaPg({ connectionString: url }, { schema });
-
-  const baseClient = new PrismaClient({
-    adapter: baseAdapter,
-    errorFormat: 'pretty',
-    ...(logQuery ? PRISMA_LOG_OPTIONS : {}),
+  const baseAdapter = new PrismaPg(createPgPool(url), {
+    schema,
+    disposeExternalPool: true,
+    onPoolError: err => log('pool error: %s', err.message),
   });
+
+  const baseClient = withConnectionRetry(
+    new PrismaClient({
+      adapter: baseAdapter,
+      errorFormat: 'pretty',
+      ...(logQuery ? PRISMA_LOG_OPTIONS : {}),
+    }),
+  );
 
   if (logQuery) {
     baseClient.$on('query', log);
@@ -387,15 +444,16 @@ function getClient() {
 
   if (!replicaUrl) {
     log('Prisma initialized');
-
-    if (process.env.NODE_ENV === 'production') {
-      globalThis[PRISMA] ??= baseClient;
-    }
+    globalThis[PRISMA] = baseClient;
 
     return baseClient;
   }
 
-  const replicaAdapter = new PrismaPg({ connectionString: replicaUrl }, { schema });
+  const replicaAdapter = new PrismaPg(createPgPool(replicaUrl), {
+    schema,
+    disposeExternalPool: true,
+    onPoolError: err => log('replica pool error: %s', err.message),
+  });
 
   const replicaClient = new PrismaClient({
     adapter: replicaAdapter,
@@ -414,19 +472,12 @@ function getClient() {
   );
 
   log('Prisma initialized (with replica)');
-
-  if (process.env.NODE_ENV === 'production') {
-    globalThis[PRISMA] ??= extended;
-  }
+  globalThis[PRISMA] = extended;
 
   return extended;
 }
 
-const client = (
-  process.env.NODE_ENV === 'production' && globalThis[PRISMA]
-    ? globalThis[PRISMA]
-    : getClient()
-) as ReturnType<typeof getClient>;
+const client = getClient() as ReturnType<typeof getClient>;
 
 export default {
   client,

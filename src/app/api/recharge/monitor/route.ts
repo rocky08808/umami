@@ -9,7 +9,11 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const result = await processAutoRechargeOrders();
+  try {
+    const result = await processAutoRechargeOrders();
 
-  return json(result);
+    return json(result);
+  } catch {
+    return json({ matched: 0, expired: 0, skipped: true });
+  }
 }

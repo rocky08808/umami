@@ -1,13 +1,13 @@
 {
-  "name": "umami",
+  "name": "website-analytics",
   "version": "3.1.0",
   "description": "A modern, privacy-focused alternative to Google Analytics.",
-  "author": "Umami Software, Inc. <hello@umami.is>",
+  "author": "Jimmy Chen <jimmy98988@gmail.com>",
   "license": "MIT",
-  "homepage": "https://umami.is",
+  "homepage": "https://www.jimmy-chen.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umami-software/umami.git"
+    "url": "https://github.com/jimmy98988/website-analytics.git"
   },
   "type": "module",
   "scripts": {

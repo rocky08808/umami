@@ -55,7 +55,7 @@ export function RechargeTutorial({ network }: { network: string }) {
           <Text weight="bold" size="sm">
             {t('recharge.tutorial-tips-title')}
           </Text>
-          <Column gap="1" paddingStart="4">
+          <Column gap="1" style={{ paddingInlineStart: '1rem' }}>
             {TIP_KEYS.map(key => (
               <Text key={key} color="muted" size="sm">
                 • {t(`recharge.${key}`)}
