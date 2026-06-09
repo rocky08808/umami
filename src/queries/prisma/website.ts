@@ -51,6 +51,16 @@ const websiteCreateUserInclude = {
   },
 } as const;
 
+function withWebsiteListFilters(filters?: QueryFilters): QueryFilters {
+  const orderBy = filters?.orderBy || 'createdAt';
+
+  return {
+    ...filters,
+    orderBy,
+    sortDescending: filters?.sortDescending ?? orderBy === 'createdAt',
+  };
+}
+
 export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filters?: QueryFilters) {
   return getWebsites(
     {
@@ -72,10 +82,7 @@ export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filte
       },
       include: websiteCreateUserInclude,
     },
-    {
-      orderBy: 'name',
-      ...filters,
-    },
+    withWebsiteListFilters(filters),
   );
 }
 
@@ -95,10 +102,7 @@ export async function getUserWebsites(userId: string, filters?: QueryFilters) {
         ...websiteCreateUserInclude,
       },
     },
-    {
-      orderBy: 'name',
-      ...filters,
-    },
+    withWebsiteListFilters(filters),
   );
 }
 
@@ -110,7 +114,7 @@ export async function getTeamWebsites(teamId: string, filters?: QueryFilters) {
       },
       include: websiteCreateUserInclude,
     },
-    filters,
+    withWebsiteListFilters(filters),
   );
 }
 
