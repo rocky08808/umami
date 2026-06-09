@@ -42,6 +42,7 @@ import { CustomerServiceNotice } from './CustomerServiceNotice';
 import { RechargeOrderCountdown } from './RechargeOrderCountdown';
 import { RechargeOrdersList } from './RechargeOrdersList';
 import { RechargePayAmountHighlight } from './RechargePayAmountHighlight';
+import { RechargeTutorial } from './RechargeTutorial';
 import { WalletAddressQrCode } from './WalletAddressQrCode';
 
 export function RechargePage() {
@@ -334,6 +335,8 @@ export function RechargePage() {
             </Column>
           </Panel>
         </Grid>
+
+        <RechargeTutorial network={network} />
 
         <CustomerServiceNotice />
 
